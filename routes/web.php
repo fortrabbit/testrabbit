@@ -16,15 +16,28 @@ Route::get('/', function () {
 });
 
 Route::get('/apcu', function () {
-  $faker = Faker\Factory::create();
+    $faker = Faker\Factory::create();
 
-  apcu_clear_cache();
+    apcu_clear_cache();
+    echo 'Cleared APCu cache.<br>';
 
-  for($i = 0; $i < 1000; $i++) {
-    apcu_store($faker->unique()->sha1, $faker->name);
-  }
+    $keys = [];
+    for($i = 0; $i < 1000; $i++) {
+        $keys[] = $key = $faker->unique()->sha1;
+        apcu_store($key, $faker->name);
+    }
+    echo 'Stored 1000 items in APCu.<br>';
 
-  echo 'Stored 1000 items in APCu.';
+    for($i = 0; $i < 500; $i++) {
+        $key_id = $faker->numberBetween(0,999);
+        apcu_fetch($keys[$key_id]);
+    }
+    echo 'Fetched 500 random items from APCu.<br>';
 
-  dump(apcu_cache_info(), apcu_sma_info());
+    for($i = 0; $i < 100; $i++) {
+        apcu_fetch($faker->sha1);
+    }
+    echo 'Fetched 100 missing items from APCu.<br>';
+
+    dump(apcu_cache_info(), apcu_sma_info());
 });

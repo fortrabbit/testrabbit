@@ -89,9 +89,5 @@ foreach ($created as $ii) {
 	echo '<img src="'.$ii.'">';
 }
 
-phpinfo();
-
-
-
 //header("Content-Type: image/jpg");
 //echo $i->getImageBlob();

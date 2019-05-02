@@ -1,86 +1,87 @@
 <!doctype html>
 <html lang="{{ app.getLocale() }}">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+    <title>Laravel</title>
 
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Helvetica Neue', sans-serif;
-                font-weight: 200;
-                height: 100vh;
-                margin: 0;
-            }
+    <style>
+        html, body {
+            background-color: #fff;
+            color: #636b6f;
+            font-family: 'Helvetica Neue', sans-serif;
+            font-weight: 200;
+            height: 100vh;
+            margin: 0;
+        }
 
-            .full-height {
-                height: 100vh;
-            }
+        .full-height {
+            height: 100vh;
+        }
 
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
+        .flex-center {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
 
-            .position-ref {
-                position: relative;
-            }
+        .position-ref {
+            position: relative;
+        }
 
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
+        .top-right {
+            position: absolute;
+            right: 10px;
+            top: 18px;
+        }
 
-            .content {
-                text-align: center;
-            }
+        .content {
+            text-align: left;
+            padding: 20px;
+        }
 
-            .title {
-                font-size: 84px;
-            }
+        .title {
+            font-size: 84px;
+        }
 
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
+        .links > a {
+            color: #636b6f;
+            padding: 0 25px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .1rem;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
 
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            <div class="content">
-                <div class="title m-b-md">
-                    fortrabbit test suite
-                </div>
+        .m-b-md {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="flex-center position-ref full-height">
+    <div class="content">
+        <div class="title m-b-md">
+            fortrabbit test suite
+        </div>
 
-                <div class="links">
-                    <a href="info.php">PHP info</a>
-                    <a href="/apcu">Fill APCu data</a>
-                    <a href="/htaccess/https-redirect/">Test HTTPS redirect</a>
-                    <a href="/htaccess/domain-redirect/">Test domain redirect</a>
-                    <a href="/htaccess/custom-404/not-found">Test custom 404</a>
-                    <a href="/imagick">Test ImageMagick</a>
-                    <a href="/mongodb">Test connection to MongoDB</a>
-                </div>
+        <ul class="links">
+            <li></li><a href="info.php">PHP info</a></li>
+            <li><a href="/apcu">Fill APCu data</a></li>
+            <li><a href="/htaccess/https-redirect/">Test HTTPS redirect</a></li>
+            <li><a href="/htaccess/domain-redirect/">Test domain redirect</a></li>
+            <li><a href="/htaccess/custom-404/not-found">Test custom 404</a></li>
+            <li><a href="/imagick">Test ImageMagick</a></li>
+            <li><a href="/mongodb">Test connection to MongoDB</a></li>
+        </ul>
 
-                <h3>Test cli commands</h3>
+        <h3>Test cli commands</h3>
 
-                <code>
-
+        <code>
+            <pre style="text-align: left">
                     # Creates two dummy job with StdOut
                     php artisan test:job sleep -C 2
 
@@ -102,10 +103,10 @@
 
                     # Run migrations (if any)
                     php artisan migrate --force
+            </pre>
+        </code>
 
-                </code>
-
-            </div>
-        </div>
-    </body>
+    </div>
+</div>
+</body>
 </html>

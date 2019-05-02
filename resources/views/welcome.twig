@@ -105,6 +105,7 @@
 
             # Handle queued jobs
             php artisan queue:work
+            php artisan queue:cleanup
 
             # Run migrations (if any)
             php artisan migrate --force

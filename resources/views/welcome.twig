@@ -17,6 +17,13 @@
             margin: 0;
         }
 
+        code {
+            display: block;
+            font-family: monospace;
+            white-space: pre;
+            margin: 0;
+        }
+
         .full-height {
             height: 100vh;
         }
@@ -69,7 +76,7 @@
         </div>
 
         <ul class="links">
-            <li></li><a href="info.php">PHP info</a></li>
+            <li><a href="info.php">PHP info</a></li>
             <li><a href="/apcu">Fill APCu data</a></li>
             <li><a href="/htaccess/https-redirect/">Test HTTPS redirect</a></li>
             <li><a href="/htaccess/domain-redirect/">Test domain redirect</a></li>
@@ -79,31 +86,28 @@
         </ul>
 
         <h3>Test cli commands</h3>
-
         <code>
-            <pre style="text-align: left">
-                    # Creates two dummy job with StdOut
-                    php artisan test:job sleep -C 2
+            # Creates two dummy job with StdOut
+            php artisan test:job sleep -C 2
 
-                    # Creates 10 jobs random with StdErr + Exceptions
-                    php artisan test:job error -C 10
+            # Creates 10 jobs random with StdErr + Exceptions
+            php artisan test:job error -C 10
 
-                    # Creates a jobs some memory consumption (64,512MB)
-                    php artisan test:job memory --args=64
-                    php artisan test:job memory --args=512
+            # Creates a jobs some memory consumption (64,512MB)
+            php artisan test:job memory --args=64
+            php artisan test:job memory --args=512
 
-                    # Mongo connection test (deploy)
-                    php artisan test:mongo
+            # Mongo connection test (deploy)
+            php artisan test:mongo
 
-                    # Mongo connection test (Worker)
-                    php artisan test:mongo --queued
+            # Mongo connection test (Worker)
+            php artisan test:mongo --queued
 
-                    # Handle queued jobs
-                    php artisan queue:work
+            # Handle queued jobs
+            php artisan queue:work
 
-                    # Run migrations (if any)
-                    php artisan migrate --force
-            </pre>
+            # Run migrations (if any)
+            php artisan migrate --force
         </code>
 
     </div>

@@ -11,8 +11,15 @@
 |
 */
 
+use App\Jobs\MongoTestJob;
+
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/mongodb', function () {
+    echo "Try mongodb connection form HTTP";
+    MongoTestJob::dispatchNow();
 });
 
 Route::get('/apcu', function () {

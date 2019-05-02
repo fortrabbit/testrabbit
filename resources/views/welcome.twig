@@ -74,7 +74,37 @@
                     <a href="/htaccess/domain-redirect/">Test domain redirect</a>
                     <a href="/htaccess/custom-404/not-found">Test custom 404</a>
                     <a href="/imagick">Test ImageMagick</a>
+                    <a href="/mongodb">Test connection to MongoDB</a>
                 </div>
+
+                <h3>Test cli commands</h3>
+
+                <code>
+
+                    # Creates two dummy job with StdOut
+                    php artisan test:job sleep -C 2
+
+                    # Creates 10 jobs random with StdErr + Exceptions
+                    php artisan test:job error -C 10
+
+                    # Creates a jobs some memory consumption (64,512MB)
+                    php artisan test:job memory --args=64
+                    php artisan test:job memory --args=512
+
+                    # Mongo connection test (deploy)
+                    php artisan test:mongo
+
+                    # Mongo connection test (Worker)
+                    php artisan test:mongo --queued
+
+                    # Handle queued jobs
+                    php artisan queue:work
+
+                    # Run migrations (if any)
+                    php artisan migrate --force
+
+                </code>
+
             </div>
         </div>
     </body>

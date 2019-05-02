@@ -15,6 +15,9 @@ return [
 
     'default' => env('DB_CONNECTION', 'mysql'),
 
+
+    // Test database (credentials in the config are intentionally)
+    'mongodb' => 'mongodb+srv://test:skud83bef0zucpdq@cluster0-rb7zu.mongodb.net/test?retryWrites=true',
     /*
     |--------------------------------------------------------------------------
     | Database Connections

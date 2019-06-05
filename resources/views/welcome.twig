@@ -85,6 +85,28 @@
             <li><a href="/mongodb">Test connection to MongoDB</a></li>
         </ul>
 
+        <h3>Test Workers</h3>
+        <ol>
+            <li>Open one of the Testrabbit Pro apps, or create a new one</li>
+            <li>
+                Create one nonstop job with SIGTERM - 10 sec
+                <code>artisan queue:work --sleep=5</code>
+            </li>
+            <li>
+                Create one cronjob<br>
+                <code>artisan schedule:run</code>
+            </li>
+            <li>
+                Open a tail for the worker logs to watch for output
+                <code>ssh testrabbit-us1@log.us1.frbit.com tail source:worker</code>
+            </li>
+            <li>
+                Run these ssh commands to create worker jobs
+                <code>ssh testrabbit-us1@deploy.us1.frbit.com "php artisan test:job sleep -C 5"</code>
+                <code>ssh testrabbit-us1@deploy.us1.frbit.com "php artisan test:job error -C 10"</code>
+            </li>
+        </ol>
+
         <h3>Test cli commands</h3>
         <code>
             # Creates two dummy job with StdOut

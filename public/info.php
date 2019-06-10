@@ -1,5 +1,11 @@
 <?php
 
+if ($_SERVER['APP_SECRETS']) {
+    echo "We have app secrets!";
+} else {
+    echo "No secrets here!";
+}
+
 # Check for argon2 password hashing
 print '<pre>';
 if (defined('PASSWORD_ARGON2ID')) {

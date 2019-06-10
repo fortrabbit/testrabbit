@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\JobTestCommand;
 use App\Console\Commands\MongoTestCommand;
+use App\Console\Commands\SecretTestCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -16,7 +17,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         JobTestCommand::class,
-        MongoTestCommand::class
+        MongoTestCommand::class,
+        SecretTestCommand::class,
     ];
 
     /**

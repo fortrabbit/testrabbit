@@ -1,5 +1,7 @@
 <?php
 
+error_log('Someone visited testrabbit!');
+
 # Check for argon2 password hashing
 print '<pre>';
 if (defined('PASSWORD_ARGON2ID')) {

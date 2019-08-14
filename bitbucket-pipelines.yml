@@ -8,10 +8,11 @@ pipelines:
               - git push --force testrabbit-uni@deploy.usx.frbit.com:testrabbit-uni.git HEAD:master
               - git push --force testrabbit-pro@deploy.usx.frbit.com:testrabbit-pro.git HEAD:master
       -   step:
-            name: Deploy to EU2
+            name: Deploy to EU2 and US1
             deployment: production
             trigger: manual
             script:
               - git push --force testrabbit-uni@deploy.eu2.frbit.com:testrabbit-uni.git HEAD:master
               - git push --force testrabbit-pro@deploy.eu2.frbit.com:testrabbit-pro.git HEAD:master
-
+              - git push --force testrabbit-us1-u@deploy.us1.frbit.com:testrabbit-us1-u.git HEAD:master
+              - git push --force testrabbit-us1@deploy.us1.frbit.com:testrabbit-us1.git HEAD:master

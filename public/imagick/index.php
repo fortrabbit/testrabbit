@@ -69,7 +69,7 @@ foreach (range(1, $loops) as $c) {
 		try {
 			$new = 'tmp/' . uniqid('img.', true);
 			$created[] = $new;
-			$i->thumbnailImage(500, 800, true, false);
+			$i->thumbnailImage(1000, 1600, true, false);
 			$i->writeImage(__DIR__ . '/' . $new);
 		} catch(\Exception $e) {
 			echo $e->getMessage();

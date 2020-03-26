@@ -11,7 +11,7 @@ class SecretTestCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'test:secret';
+    protected $signature = 'do:secret';
 
     /**
      * The console command description.

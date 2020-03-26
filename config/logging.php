@@ -15,7 +15,8 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stderr'),
+    //'default' => env('LOG_CHANNEL', 'stderr'),
+    'default' => 'stderr',
 
     /*
     |--------------------------------------------------------------------------

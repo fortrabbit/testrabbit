@@ -7,6 +7,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use MongoDB\Driver\Exception\ConnectionTimeoutException;
 
 class MongoTestJob implements ShouldQueue
 {
@@ -29,10 +30,12 @@ class MongoTestJob implements ShouldQueue
      */
     public function handle()
     {
+        try {
+            $client = new \MongoDB\Client(config('database.mongodb'));
+            dd($client->listDatabases());
+        } catch (ConnectionTimeoutException $e) {
+            echo $e->getMessage() . PHP_EOL;
+        }
 
-
-        $client = new \MongoDB\Client(config('database.mongodb'));
-
-        dd($client->listDatabases());
     }
 }

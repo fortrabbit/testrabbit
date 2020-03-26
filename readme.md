@@ -18,8 +18,8 @@ Set up the environment file
 Allow writing to storage/
 
     chown -R jaroslav:33 storage
-    find storage/ -type f | xargs chmod 664 
-    find storage/ -type d | xargs chmod 775 
+    find storage/ database/ -type f | xargs chmod 664
+    find storage/ database/ -type d | xargs chmod 775
 
 Listen on localhost:80
 

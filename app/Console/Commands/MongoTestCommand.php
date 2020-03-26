@@ -12,7 +12,7 @@ class MongoTestCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'test:mongo {--queued}';
+    protected $signature = 'do:mongo {--queued}';
 
     /**
      * The console command description.

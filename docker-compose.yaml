@@ -2,10 +2,11 @@ version: '3.1'
 
 services:
     php:
-        image: ghcr.io/fortrabbit/frbit-testrabbit
+        image: ghcr.io/fortrabbit/frbit-testrabbit:latest # this must match image name in .github/workflows/test.yml
         build: .
         volumes:
-            - '.:/usr/src/app'
+            - .:/usr/src/app:delegated
+            - $HOME/.composer/cache:/home/user/.composer/cache:delegated
         secrets:
             - host_ssh_key
 

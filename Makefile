@@ -12,7 +12,7 @@ install: build
 ifdef GITHUB_ACTIONS
 	docker-compose run --user=${DOCKER_USER} --rm php bash -c '\
 	  composer config -g github-oauth.github.com ${GITHUB_AUTH} && \
-	  composer install --no-interaction --prefer-dist'
+	  composer install --no-interaction --prefer-dist --no-scripts --no-cache'
 else
 	docker-compose run --rm php composer install
 endif

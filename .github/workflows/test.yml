@@ -1,0 +1,42 @@
+name: tests
+on: [push]
+env:
+  DOCKER_USER: 1001 # user is "runner" with id 1001, group is docker with id 115
+  DOCKER_REGISTRY_IMAGE: ghcr.io/fortrabbit/frbit-testrabbit
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        php-version: ['7.3', '7.4', '8.0']
+
+    steps:
+      -   uses: actions/checkout@v1
+
+      -   name: Build docker image using previous as cache
+          run: |
+            echo "${{ secrets.ACTIONS_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} || true
+            docker build --build-arg PHP_VERSION=${{ matrix.php-version }} \
+              --cache-from $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} \
+              --tag $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} \
+              --tag $DOCKER_REGISTRY_IMAGE:latest .
+            docker push $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }}
+
+      -   name: Cache vendor folder
+          uses: actions/cache@v1
+          with:
+            path: vendor
+            key: vendor-${{ hashFiles('composer.lock') }}
+            restore-keys: |
+              vendor-${{ hashFiles('composer.lock') }}
+              vendor-
+
+      -   name: Create dummy SSH key for docker-compose secret
+          run: mkdir -p ~/.ssh/ && touch ~/.ssh/id_rsa
+
+      -   name: Install dependencies
+          run: |
+            PHP_VERSION=${{ matrix.php-version }} GITHUB_AUTH=${{ secrets.ACTIONS_TOKEN }} make install
+

@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+    php:
+        image: ghcr.io/fortrabbit/frbit-testrabbit
+        build: .
+        volumes:
+            - '.:/usr/src/app'
+        secrets:
+            - host_ssh_key
+
+secrets:
+    host_ssh_key:
+        file: ~/.ssh/id_rsa

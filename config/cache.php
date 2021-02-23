@@ -1,5 +1,56 @@
 <?php
 
+// locally: use standard settings
+$servers = [[
+    'host' => env('MEMCACHED_HOST', '127.0.0.1'),
+    'port' => env('MEMCACHED_PORT', 11211),
+    'weight' => 100,
+]];
+
+// on fortrabbit: construct credentials from App secrets
+if (getenv('APP_SECRETS')) {
+    $secrets = json_decode(file_get_contents(getenv('APP_SECRETS')), true);
+    $servers = [[
+        'host' => $secrets['MEMCACHE']['HOST1'],
+        'port' => $secrets['MEMCACHE']['PORT1'],
+        'weight' => 100,
+    ]];
+    if ($secrets['MEMCACHE']['COUNT'] > 1) {
+        $servers []= [
+            'host' => $secrets['MEMCACHE']['HOST2'],
+            'port' => $secrets['MEMCACHE']['PORT2'],
+            'weight' => 100,
+        ];
+    }
+}
+
+if (extension_loaded('memcached')) {
+    $timeout_ms = 50;
+    $options = [
+      // Assure that dead servers are properly removed and ...
+      \Memcached::OPT_REMOVE_FAILED_SERVERS => true,
+
+      // ... retried after a short while (here: 2 seconds)
+      \Memcached::OPT_RETRY_TIMEOUT         => 2,
+
+      // KETAMA must be enabled so that replication can be used
+      \Memcached::OPT_LIBKETAMA_COMPATIBLE  => true,
+
+      // Replicate the data, write it to both memcached servers   
+      \Memcached::OPT_NUMBER_OF_REPLICAS    => 1,
+
+      // Those values assure that a dead (due to increased latency or
+      // really unresponsive) memcached server is dropped fast
+      \Memcached::OPT_POLL_TIMEOUT          => $timeout_ms,        // milliseconds
+      \Memcached::OPT_SEND_TIMEOUT          => $timeout_ms * 1000, // microseconds
+      \Memcached::OPT_RECV_TIMEOUT          => $timeout_ms * 1000, // microseconds
+      \Memcached::OPT_CONNECT_TIMEOUT       => $timeout_ms,        // milliseconds
+
+      // Further performance tuning
+      \Memcached::OPT_NO_BLOCK              => true,
+    ];
+}    
+
 return [
 
     /*
@@ -50,22 +101,10 @@ return [
         ],
 
         'memcached' => [
-            'driver' => 'memcached',
+            'driver'        => 'memcached',
             'persistent_id' => env('MEMCACHED_PERSISTENT_ID'),
-            'sasl' => [
-                env('MEMCACHED_USERNAME'),
-                env('MEMCACHED_PASSWORD'),
-            ],
-            'options' => [
-                // Memcached::OPT_CONNECT_TIMEOUT  => 2000,
-            ],
-            'servers' => [
-                [
-                    'host' => env('MEMCACHED_HOST', '127.0.0.1'),
-                    'port' => env('MEMCACHED_PORT', 11211),
-                    'weight' => 100,
-                ],
-            ],
+            'options'       => $options ?? [],
+            'servers'       => $servers,
         ],
 
         'redis' => [

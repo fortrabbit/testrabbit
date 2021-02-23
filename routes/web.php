@@ -22,6 +22,14 @@ Route::get('/mongodb', function () {
     MongoTestJob::dispatchNow();
 });
 
+Route::get('/cache', function () {
+    echo "Driver:" . config('cache.default') . "<br>";
+    cache(['somekey' => time()], 10);
+    echo "Result:" . cache("somekey");
+});
+
+
+
 Route::get('/apcu', function () {
     $faker = Faker\Factory::create();
 

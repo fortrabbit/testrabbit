@@ -8,19 +8,11 @@
         "ext-apcu": "*",
         "ext-imagick": "*",
         "fideloper/proxy": "^4.0",
-        "fzaninotto/faker": "^1.8",
-        "laravel/framework": "^6.0 | ^8.0",
+        "laravel/framework": "^8.0",
         "laravel/helpers": "^1.4",
-        "laravel/tinker": "^1.0",
+        "laravel/tinker": "*",
         "mongodb/mongodb": "^1.4",
         "rcrowe/twigbridge": "*"
-    },
-    "require-dev": {
-        "beyondcode/laravel-dump-server": "^1.0",
-        "filp/whoops": "^2.0",
-        "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^2.0",
-        "phpunit/phpunit": "^7.0"
     },
     "autoload": {
         "classmap": [
@@ -60,8 +52,14 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.0.2"
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
 }
+
+
+

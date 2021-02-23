@@ -10,10 +10,11 @@
         "ext-imagick": "*",
         "fideloper/proxy": "^4.0",
         "fzaninotto/faker": "^1.8",
-        "laravel/framework": "5.7.*",
+        "laravel/framework": "^6.0 | ^8.0",
+        "laravel/helpers": "^1.4",
         "laravel/tinker": "^1.0",
         "mongodb/mongodb": "^1.4",
-        "rcrowe/twigbridge": "^0.9.8"
+        "rcrowe/twigbridge": "*"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

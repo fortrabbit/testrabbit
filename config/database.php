@@ -17,7 +17,8 @@ return [
 
 
     // Test database (credentials in the config are intentionally)
-    'mongodb' => 'mongodb+srv://test:skud83bef0zucpdq@cluster0-rb7zu.mongodb.net/test?retryWrites=true',
+    'mongodb' => 'mongodb+srv://test:skud83bef0zucpdq@jrrabbit.magxw.mongodb.net/test?retryWrites=true&w=majority',
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections

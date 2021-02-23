@@ -24,7 +24,9 @@ Route::get('/mongodb', function () {
 
 Route::get('/cache', function () {
     echo "Driver:" . config('cache.default') . "<br>";
-    cache(['somekey' => time()], 10);
+    if(!cache("somekey")) {
+        cache(['somekey' => time()], 10);
+    }
     echo "Result:" . cache("somekey");
 });
 

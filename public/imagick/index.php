@@ -42,7 +42,7 @@ $xLargeLimit = 10 * 1024 * 1024;
 if (isset($_GET['file'])) {
 	$file = $_GET['file'];
 	$paths = ["src/$file"];
-} 
+}
 // dir scan
 else {
 	$paths = glob('src/*');
@@ -61,7 +61,7 @@ foreach (range(1, $loops) as $c) {
 		if ($bytes > $xLargeLimit && !$useXLarge) {
 			continue;
 		}
-		
+
 		$start = microtime(true);
 		$i = new Craft2\Imagick\Imagick($path);
 
@@ -70,13 +70,13 @@ foreach (range(1, $loops) as $c) {
 			$new = 'tmp/' . uniqid('img.', true);
 			$created[] = $new;
 			$i->thumbnailImage(1000, 1600, true, false);
-			$i->writeImage(__DIR__ . '/' . $new);
+			$i->writeImage(__DIR__ . '/' . $new . '.webp');
 		} catch(\Exception $e) {
 			echo $e->getMessage();
-		} 
+		}
 
 		echo sprintf(
-				'%s <b>%s</b> done in %f ms<br>', 
+				'%s <b>%s</b> done in %f ms<br>',
 				$path,
 				(string) human_filesize($bytes),
 				(microtime(true) - $start)

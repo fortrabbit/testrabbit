@@ -199,6 +199,9 @@ class Imagick extends \Imagick {
         // set the image’s bit depth to 8 bits
         $this->setImageDepth(8);
 
+        // Lets do some webp
+        $this->setImageFormat('webp');
+
         // turn off interlacing
         $this->setInterlaceScheme(\Imagick::INTERLACE_NO);
 

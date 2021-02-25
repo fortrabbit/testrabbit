@@ -86,7 +86,7 @@ foreach (range(1, $loops) as $c) {
 }
 
 foreach ($created as $ii) {
-	echo '<img src="'.$ii.'">';
+	echo '<img src="'.$ii.'.webp">';
 }
 
 //header("Content-Type: image/jpg");

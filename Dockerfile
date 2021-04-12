@@ -1,5 +1,5 @@
 ARG PHP_VERSION="8.0"
-FROM php:${PHP_VERSION}-cli-buster
+FROM php:${PHP_VERSION}-apache-buster
 
 RUN echo 'deb-src http://deb.debian.org/debian buster main' >> /etc/apt/sources.list
 #RUN echo 'deb-src http://deb.debian.org/debian-security buster/updates main' >> /etc/apt/sources.list
@@ -19,8 +19,8 @@ RUN ai \
     libmagickwand-dev
 
 # Install composer
-ENV COMPOSER_VERSION=2.0.9
-ENV COMPOSER_SHA256=24faa5bc807e399f32e9a21a33fbb5b0686df9c8850efabe2c047c2ccfb9f9cc
+ENV COMPOSER_VERSION=2.0.12
+ENV COMPOSER_SHA256=82ea8c1537cfaceb7e56f6004c7ccdf99ddafce7237c07374d920e635730a631
 RUN wget  -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && \
     echo "$COMPOSER_SHA256  /usr/local/bin/composer" | sha256sum --check && \
     chmod +x /usr/local/bin/composer
@@ -68,16 +68,21 @@ RUN mkdir -p /usr/src/php/ext/imagick; \
 #    apt-get install -y mysql-client=5.6.* \
 #    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Configure apache
+RUN a2enmod rewrite
+ADD docker/apache.conf /etc/apache2/sites-enabled/000-default.conf
+
 # Set up users that works on linux and in github actions
 RUN groupadd user -g 1000 && \
     useradd -m -u 1000 -g 1000 user && \
     useradd -m -u 1001 -g 1000 runner && \
-    mkdir -p /usr/src/app && \
-    chown 1000:1000 /usr/src/app
+    mkdir -p /srv/app/testrabbit && \
+    chown 1000:1000 /srv/app
 
 USER user
 
-WORKDIR /usr/src/app
+WORKDIR /srv/app/testrabbit
+
 
 ENV PATH "$PATH:vendor/bin:bin"
 

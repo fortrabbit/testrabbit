@@ -5,17 +5,17 @@ require __DIR__.'/../vendor/autoload.php';
 $memcachedClass = '\Memcached';
 if (class_exists($memcachedClass)) {
     $mc = new Memcached();
-    foreach (['127.0.0.1', 'memcachecluster.frbit.com'] as $e) {
+    foreach (['memcachecluster.frbit.com'] as $e) {
         try {
             $port = 11211;
             $host = $e;
             $mc->addServer($host, $port);
-            $mc->set('message', 'Hola Mundo, mucho memcached, obrigado.');
+            $mc->set('message', 'Successfully retrieved message! ✅');
             if ($hola = $mc->get('message')) {
                 echo "Memcached; message: $hola\n";
-                return;
+            } else {
+                echo "Memcached error; no response from $host:$port\n";
             }
-            echo "Memcached error; no response from $host:$port\n";
         } catch (\Exception $e) {
             echo "error from memcached; {$e->getMessage()}\n";
         }

@@ -20,3 +20,5 @@ endif
 update: build
 	docker-compose run --rm php composer update
 
+up: build
+	docker-compose up

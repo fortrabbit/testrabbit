@@ -1,88 +1,73 @@
-<?php is_file(__DIR__ . '/app.php') and require(__DIR__ . '/app.php'); ?>
 <?php header('Content-type: text/plain'); ?>
 <?php
 
-/* version: 2020-mar 30 */
-
-
 function discoverMissingExtensions(): array
 {
-    $removed_in['7.0.0'] = ['ereg', 'mssql', 'mysql', 'sybase_ct'];
-    $removed_in['7.2.0'] = ['mcrypt'];
     $removed_in['7.4.0'] = ['wddx', 'phalcon'];
-    $expected_since['7.2.0'] = ['sodium'];
 
     $expected = [
+        'bcmath' => 1,
         'blackfire' => 1,
+        'calendar' => 1,
+        'ctype' => 1,
+        'curl' => 1,
+        'dba' => 1,
+        'exif' => 1,
+        'fpm' => 1,
+        'ftp' => 1,
+        'gd' => 1,
+        'geoip' => 1,
+        'gmp' => 1,
+        'gnupg' => 1,
+        'igbinary' => 1,
         'imagick' => 1,
+        'imap' => 1,
+        'intl' => 1,
         'ldap' => 1,
+        'mbstring' => 1,
         'memcached' => 1,
         'mongodb' => 1,
         'newrelic' => 1,
+        'oauth' => 1,
+        'opcache' => 1,
+        'openssl' => 1,
+        'pcntl' => 1,
         'pdo' => 1,
         'pgsql' => 1,
+        'phalcon' => 1,
+        'phar' => 1,
+        'posix' => 1,
         'redis' => 1,
+        'shmop' => 1,
+        'soap' => 1,
+        'sockets' => 1,
         'sqlite3' => 1,
+        'ssh2' => 1,
+        'sodium'=> 1,
+        'sysvmsg' => 1,
+        'sysvsem' => 1,
+        'sysvshm' => 1,
+        'tidy' => 1,
+        'wddx' => 1,
+        'xsl' => 1,
+        'yaml' => 1,
+        'zip' => 1,
     ];
-
-    $expected = array_merge(
-        $expected,
-        [
-            'bcmath' => 1,
-            'calendar' => 1,
-            'ctype' => 1,
-            'curl' => 1,
-            'dba' => 1,
-            'exif' => 1,
-            'fpm' => 1,
-            'ftp' => 1,
-            'gd' => 1,
-            'geoip' => 1,
-            'gmp' => 1,
-            'gnupg' => 1,
-            'igbinary' => 1,
-            'imagick' => 1,
-            'imap' => 1,
-            'intl' => 1,
-            'mbstring' => 1,
-            'oauth' => 1,
-            'opcache' => 1,
-            'openssl' => 1,
-            'pcntl' => 1,
-            'phar' => 1,
-            'posix' => 1,
-            'shmop' => 1,
-            'soap' => 1,
-            'sockets' => 1,
-            'ssh2' => 1,
-            'sysvmsg' => 1,
-            'sysvsem' => 1,
-            'sysvshm' => 1,
-            'tidy' => 1,
-            'wddx' => 1,
-            'xsl' => 1,
-            'yaml' => 1,
-            'zip' => 1,
-            'mcrypt' => 1,
-            'phalcon' => 1,
-        ]
-    );
 
     foreach ($removed_in as $v => $extensions) {
         if (version_compare($v, phpversion(), 'le')) {
             foreach ($extensions as $deprecated) {
-                $me = phpversion();
                 unset($expected[$deprecated]);
             }
         }
     }
-    foreach ($expected_since as $v => $extensions) {
-        if (version_compare($v, phpversion(), 'le')) {
-            foreach ($extensions as $added) {
-                $expected[$added] = 1;
-            }
-        }
-    }
+//    foreach ($expected_since as $v => $extensions) {
+//        if (version_compare($v, phpversion(), 'le')) {
+//            foreach ($extensions as $added) {
+//                $expected[$added] = 1;
+//            }
+//        }
+//    }
 
     $loaded = [];
     foreach (get_loaded_extensions() as $i => $e) {
@@ -93,10 +78,10 @@ function discoverMissingExtensions(): array
         unset($expected['pcntl']);
     }
 
-
     if (function_exists('opcache_get_status')) {
         $loaded['opcache'] = 1; // Zend modules
     }
+
     $haveFpmBin = array_sum(
         [ // Detect fpm as a module (if php-fpm binary is installed)
             is_file(dirname(realpath(@$_SERVER['_']))) . '/../bin/php-fpm' ? 1 : 0,
@@ -112,11 +97,11 @@ function discoverMissingExtensions(): array
     ksort($confirmed);
     ksort($missing);
 
+    list ($ini, ) = findExpectedByInis();
 
-    list ($ini, ) = findExpectedByInis() ;
-
-    return [ $missing, $expected, $ini];
+    return [$missing, $expected, $ini];
 }
+
 
 /** Enable all extensions
  * @param string $version
@@ -180,67 +165,56 @@ function findExpectedByInis(): array {
 }
 
 function main() {
-    global $argv;
-    if (@$argv[1] == "ini") {
-        list($lines, $soFiles) = generateIni(
-            $argv[2] ?? '7.2',
-            $argv[3] ?? '/opt/php/x.y/lib/php/????????/*.so'
-        );
-        $outputPath = $argv[4] ?? '';
-        if (strlen($outputPath) && is_writable(dirname($outputPath))) {
-            if (false === file_put_contents($outputPath, $lines)) {
-                error_log("Unable to write to $outputPath", 0, 2);
-            }
-        }
-        if (! strlen($outputPath)) {
-            echo $lines . PHP_EOL;
-        }
-    } else {
-        list($missing, $expected, $iniExpected) = discoverMissingExtensions();
+    list($missing, $expected, $iniExpected) = discoverMissingExtensions();
 
+    if (count($missing)) {
         if (count($missing)) {
-            if (count($missing)) {
-                $oops = [];
-                $extNames = [];
-                foreach (get_loaded_extensions() as $e) {
-                    $extNames[strtolower($e)] = $e;
-                }
-                list($settings, $soFiles) = generateIni();
-                $possibleDynamicMatches = [];
-                foreach (array_keys($missing) as $ext) {
-                    $v = phpversion($extNames[$ext] ?? "");
-                    $oops[] = "$ext - " . ($v ? "available version: $v" : "not loaded");
 
-                    foreach ($soFiles as $path) {
-                        if (false !== strpos($path, $ext)) {
-                            $possibleDynamicMatches[] = $path;
-                        }
+            $oops = [];
+            $extNames = [];
+            foreach (get_loaded_extensions() as $e) {
+                $extNames[strtolower($e)] = $e;
+            }
+
+            list($settings, $soFiles) = generateIni();
+
+            $possibleDynamicMatches = [];
+            foreach (array_keys($missing) as $ext) {
+                $v = phpversion($extNames[$ext] ?? "");
+                $oops[] = "$ext - " . ($v ? "available version: $v" : "not loaded");
+
+                foreach ($soFiles as $path) {
+                    if (false !== strpos($path, $ext)) {
+                        $possibleDynamicMatches[] = $path;
                     }
                 }
-                printf("PHP: %s - MISSING EXTENSIONS:\n  %s\n", phpversion(), join("\n  ", $oops));
-                if (count($possibleDynamicMatches)) {
-                    printf("PHP: %s - possible matches:\n  %s\n", phpversion(), join("\n  ", $possibleDynamicMatches));
-                }
             }
-            if (count($iniExpected)) {
-                $disabled = [];
-                foreach ($iniExpected as $ext => $file) {
-                    if (in_array($ext, $missing)) {
-                        $disabled[] = "$ext - $file";
-                    }
-                }
-                if (count($disabled)) {
-                    printf("PHP: %s - EXPECTED EXTENSIONS:\n  %s\n", phpversion(), join("\n  ", $disabled));
-                }
+
+            printf("PHP: %s - MISSING EXTENSIONS:\n  %s\n", phpversion(), join("\n  ", $oops));
+            if (count($possibleDynamicMatches)) {
+                printf("PHP: %s - possible matches:\n  %s\n", phpversion(), join("\n  ", $possibleDynamicMatches));
             }
-        } else {
-            printf("PHP: %s - Required extensions have been detected;\n%s\n",
-                   phpversion(),
-                   wordwrap(join(' ', array_keys($expected)), 74)
-            );
         }
-        exit(count($missing) == 0 ? 0 : 1);
+
+        if (count($iniExpected)) {
+            $disabled = [];
+            foreach ($iniExpected as $ext => $file) {
+                if (in_array($ext, $missing)) {
+                    $disabled[] = "$ext - $file";
+                }
+            }
+            if (count($disabled)) {
+                printf("PHP: %s - EXPECTED EXTENSIONS:\n  %s\n", phpversion(), join("\n  ", $disabled));
+            }
+        }
+
+    } else {
+        printf("PHP: %s - Required extensions have been detected, all is good! ✅\n%s\n",
+               phpversion(),
+               wordwrap(join(' ', array_keys($expected)), 74)
+        );
     }
+    exit(count($missing) == 0 ? 0 : 1);
 }
 
 main();

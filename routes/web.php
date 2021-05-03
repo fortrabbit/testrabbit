@@ -18,7 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/mongodb', function () {
-    echo "Try mongodb connection form HTTP";
+    echo "Try mongodb connection from HTTP";
     MongoTestJob::dispatchNow();
 });
 

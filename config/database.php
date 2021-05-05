@@ -17,7 +17,7 @@ return [
 
 
     // Test database (credentials in the config are intentionally)
-    'mongodb' => 'mongodb+srv://testrabbit:ATXLx7b6yqwEEoQB@testrabbit.ayol0.mongodb.net/testrabbit?retryWrites=true&w=majority',
+    'mongodb' => 'mongodb+srv://testrabbit:rclimKjcV7tUv97H@cluster0.njilk.mongodb.net/test?retryWrites=true&w=majority',
 
     /*
     |--------------------------------------------------------------------------

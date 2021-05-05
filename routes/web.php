@@ -11,15 +11,18 @@
 |
 */
 
-use App\Jobs\MongoTestJob;
-
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::get('/mongodb', function () {
-    echo "Try mongodb connection from HTTP";
-    MongoTestJob::dispatchNow();
+    echo "Try mongodb connection";
+    \App\Jobs\MongoTestJob::dispatchNow();
+});
+
+Route::get('/mysql', function () {
+    echo "Try mysql connection";
+    \App\Jobs\MysqlTestJob::dispatchNow();
 });
 
 Route::get('/cache', function () {

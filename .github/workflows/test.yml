@@ -3,6 +3,7 @@ on: [push]
 env:
   DOCKER_USER: 1001 # user is "runner" with id 1001, group is docker with id 115
   DOCKER_REGISTRY_IMAGE: ghcr.io/fortrabbit/frbit-testrabbit
+  DOCKER_BUILDKIT: 1
 
 jobs:
   test:
@@ -15,9 +16,15 @@ jobs:
     steps:
       -   uses: actions/checkout@v1
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.ACTIONS_TOKEN }}
+
       -   name: Build docker image using previous as cache
           run: |
-            echo "${{ secrets.ACTIONS_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker pull $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} || true
             docker build --build-arg PHP_VERSION=${{ matrix.php-version }} \
               --cache-from $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} \

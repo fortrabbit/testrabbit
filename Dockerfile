@@ -1,15 +1,21 @@
 ARG PHP_VERSION="8.0"
 FROM php:${PHP_VERSION}-apache-buster
+LABEL org.opencontainers.image.source=https://github.com/fortrabbit/testrabbit
+
+# Enable fast apt caches for use with buildkit --mount=type=cache and add apt-get install shorthand ai
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+    echo 'APT::Get::Install-Recommends "false";' > /etc/apt/apt.conf.d/skip-suggestions && \
+    echo 'apt-get update && apt-get install -y "$@"' \
+    > /usr/local/bin/aptinstall ; chmod +x /usr/local/bin/aptinstall
 
 RUN echo 'deb-src http://deb.debian.org/debian buster main' >> /etc/apt/sources.list
 #RUN echo 'deb-src http://deb.debian.org/debian-security buster/updates main' >> /etc/apt/sources.list
 #RUN echo 'deb-src http://deb.debian.org/debian buster-updates main' >> /etc/apt/sources.list
-RUN echo 'APT::Get::Install-Recommends "false";' > /etc/apt/apt.conf.d/skip-suggestions
-RUN echo 'apt-get install -yq -o=Dpkg::Use-Pty=0 "$@"' \
-    > /usr/local/bin/ai ; chmod +x /usr/local/bin/ai
-RUN apt-get update -q > /dev/null
 
-RUN ai \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt \
+    aptinstall \
     git \
     gnupg \
     openssh-client \
@@ -21,7 +27,7 @@ RUN ai \
 # Install composer
 ENV COMPOSER_VERSION=2.0.12
 ENV COMPOSER_SHA256=82ea8c1537cfaceb7e56f6004c7ccdf99ddafce7237c07374d920e635730a631
-RUN wget  -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && \
+RUN wget -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && \
     echo "$COMPOSER_SHA256  /usr/local/bin/composer" | sha256sum --check && \
     chmod +x /usr/local/bin/composer
 

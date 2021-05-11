@@ -5,7 +5,7 @@ test: install
 
 build:
 ifndef GITHUB_ACTIONS
-	docker-compose build --build-arg PHP_VERSION=${PHP_VERSION}
+	DOCKER_BUILDKIT=1 docker-compose build --build-arg PHP_VERSION=${PHP_VERSION}
 endif
 
 install: build

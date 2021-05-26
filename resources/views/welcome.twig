@@ -74,17 +74,26 @@
         <div class="title m-b-md">
             fortrabbit test suite
         </div>
-        
-        <p>Change me ✨</p>
 
-        <ul class="links">
-            <li><a href="info.php">PHP info</a></li>
-            <li><a href="/apcu">Fill APCu data</a></li>
-            <li><a href="/htaccess/https-redirect/">Test HTTPS redirect</a></li>
-            <li><a href="/htaccess/domain-redirect/">Test domain redirect</a></li>
+        <p>See our <a href="https://www.notion.so/fortrabbit/Testing-routines-4d9ae6db9dec4e6dbc487d891a1d8725">testing routines in Notion</a> for more documentation</p>
+
+        <h2>Essential tests</h2>
+
+        <ol class="links">
+            <li><a href="/extensions.php">Verify loaded extensions</a></li>
+            <li><a href="{{ url('/htaccess/https-redirect', null, false) }}">Test HTTPS redirect</a></li>
             <li><a href="/htaccess/custom-404/not-found">Test custom 404</a></li>
+            <li><a href="/apcu">Test fill APCu data</a></li>
+            <li><a href="/memcached.php">Test memcached connection</a></li>
+            <li><a href="/mongodb">Test MongoDB connection</a></li>
+            <li><a href="/mysql">Test MySQL connection</a></li>
             <li><a href="/imagick">Test ImageMagick</a></li>
-            <li><a href="/mongodb">Test connection to MongoDB</a></li>
+        </ol>
+
+        <h2>Additional test tools</h2>
+        <ul class="links">
+            <li><a href="/htaccess/domain-redirect/">Test domain redirect</a></li>
+            <li><a href="info.php">PHP info</a></li>
         </ul>
 
         <h3>Test Workers</h3>

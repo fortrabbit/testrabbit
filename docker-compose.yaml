@@ -1,0 +1,17 @@
+version: '3.1'
+
+services:
+    php:
+        image: ghcr.io/fortrabbit/frbit-testrabbit:latest # this must match image name in .github/workflows/test.yml
+        build: .
+        volumes:
+            - .:/srv/app/testrabbit:delegated
+            - $HOME/.composer/cache:/home/user/.composer/cache:delegated
+        secrets:
+            - host_ssh_key
+        ports:
+            - "80:80"
+
+secrets:
+    host_ssh_key:
+        file: ~/.ssh/id_rsa

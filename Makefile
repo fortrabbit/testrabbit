@@ -22,3 +22,6 @@ update: build
 
 up: build
 	docker-compose up
+
+clean:
+	rm -f public/imagick/tmp/img.*

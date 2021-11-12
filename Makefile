@@ -22,6 +22,17 @@ update: build
 
 up: build
 	docker-compose up
+down:
+	docker-compose down
 
 clean:
 	rm -f public/imagick/tmp/img.*
+
+
+### wip...
+html2text = html2text -nobs -style pretty -width 120
+visit_mongo:
+	curl -s -D- http://localhost/mongodb | $(html2text)
+
+do_mongo:
+	sudo su -s /bin/bash www-data -c 'php /T/fortrabbit/testrabbit/do/mango.php'

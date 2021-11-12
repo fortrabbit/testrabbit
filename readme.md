@@ -21,6 +21,10 @@ Allow writing to storage/
     find storage/ database/ -type f | xargs chmod 664
     find storage/ database/ -type d | xargs chmod 775
 
+    mkdir public/imagick/tmp -p
+    chmod 777 public/imagick/tmp
+
+
 Listen on localhost:80
 
     docker-compose up

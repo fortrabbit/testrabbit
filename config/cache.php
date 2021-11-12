@@ -10,17 +10,20 @@ $servers = [[
 // on fortrabbit: construct credentials from App secrets
 if (getenv('APP_SECRETS')) {
     $secrets = json_decode(file_get_contents(getenv('APP_SECRETS')), true);
-    $servers = [[
-        'host' => $secrets['MEMCACHE']['HOST1'],
-        'port' => $secrets['MEMCACHE']['PORT1'],
-        'weight' => 100,
-    ]];
-    if ($secrets['MEMCACHE']['COUNT'] > 1) {
-        $servers []= [
-            'host' => $secrets['MEMCACHE']['HOST2'],
-            'port' => $secrets['MEMCACHE']['PORT2'],
+
+    if (array_key_exists('MEMCACHE', $secrets)) {
+        $servers = [[
+            'host' => $secrets['MEMCACHE']['HOST1'],
+            'port' => $secrets['MEMCACHE']['PORT1'],
             'weight' => 100,
-        ];
+        ]];
+        if ($secrets['MEMCACHE']['COUNT'] > 1) {
+            $servers []= [
+                'host' => $secrets['MEMCACHE']['HOST2'],
+                'port' => $secrets['MEMCACHE']['PORT2'],
+                'weight' => 100,
+            ];
+        }
     }
 }
 
@@ -36,7 +39,7 @@ if (extension_loaded('memcached')) {
       // KETAMA must be enabled so that replication can be used
       \Memcached::OPT_LIBKETAMA_COMPATIBLE  => true,
 
-      // Replicate the data, write it to both memcached servers   
+      // Replicate the data, write it to both memcached servers
       \Memcached::OPT_NUMBER_OF_REPLICAS    => 1,
 
       // Those values assure that a dead (due to increased latency or
@@ -49,7 +52,7 @@ if (extension_loaded('memcached')) {
       // Further performance tuning
       \Memcached::OPT_NO_BLOCK              => true,
     ];
-}    
+}
 
 return [
 

@@ -3,15 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Tests\Test;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
     public function index()
     {
         $tests = [
@@ -28,7 +24,7 @@ class Controller extends BaseController
         ]);
     }
 
-    public function test(string $testName)
+    public function test(string $testName): JsonResponse
     {
         $class = '\App\Tests\\' . $testName;
         if (! class_exists($class)) {
@@ -38,7 +34,7 @@ class Controller extends BaseController
         $test = new $class;
         $result = $test->execute();
 
-        return json_encode([
+        return response()->json([
             'success' => $result->isSuccessful(),
             'message' => $result->getMessage(),
         ]);

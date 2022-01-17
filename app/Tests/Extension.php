@@ -216,4 +216,9 @@ class Extension implements Test
         }
         return [$enabled, $files];
     }
+
+    public function appType(): string
+    {
+        return self::APP_UNI;
+    }
 }

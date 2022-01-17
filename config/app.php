@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'type' => env('APP_TYPE', 'uni'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

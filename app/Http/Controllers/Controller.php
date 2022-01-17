@@ -32,10 +32,20 @@ class Controller extends BaseController
         }
         /** @var Test $test */
         $test = new $class;
+
+        if (config('app.type') === 'uni' && $test->appType() !== 'uni') {
+            return response()->json([
+                'success' => false,
+                'pass' => true,
+                'message' => 'Pro test: I will not run this on a uni app!'
+            ]);
+        }
+
         $result = $test->execute();
 
         return response()->json([
             'success' => $result->isSuccessful(),
+            'pass' => false,
             'message' => $result->getMessage(),
         ]);
     }

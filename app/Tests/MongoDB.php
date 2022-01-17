@@ -19,4 +19,9 @@ class MongoDB implements Test
 
         return new Result($success, $message);
     }
+
+    public function appType(): string
+    {
+        return self::APP_UNI;
+    }
 }

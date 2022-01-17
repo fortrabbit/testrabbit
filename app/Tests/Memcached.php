@@ -33,4 +33,9 @@ class Memcached implements Test
 
         return new Result($success, $message);
     }
+
+    public function appType(): string
+    {
+        return self::APP_PRO;
+    }
 }

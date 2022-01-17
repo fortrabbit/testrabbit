@@ -84,4 +84,9 @@ class ImagickTest implements Test
         $factor = floor((strlen($bytes) - 1) / 3);
         return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$size[$factor];
     }
+
+    public function appType(): string
+    {
+        return self::APP_UNI;
+    }
 }

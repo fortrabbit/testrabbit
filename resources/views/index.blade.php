@@ -22,17 +22,18 @@
             @foreach ($tests as $name => $test)
                 <div
                     x-cloak
-                    x-data="{success: false, message: '', isLoading: true}"
+                    x-data="{success: false, pass: false, message: '', isLoading: true}"
                     x-init="fetch('/tests/{{ $test }}')
                     .then(response => response.json())
-                    .then(response => { isLoading = false; success = response.success; message = response.message; })"
+                    .then(response => { isLoading = false; pass = response.pass; success = response.success; message = response.message; })"
                     class="bg-white mb-4 p-4 rounded-lg"
                 >
                     <div class="flex justify-between mb-2">
                         <h3 class="text-lg font-bold">{{ $name }}</h3>
                         <div x-show="!isLoading">
                             <span x-show="success"><x-check></x-check></span>
-                            <span x-show="!success"><x-cross></x-cross></span>
+                            <span x-show="!success && !pass"><x-cross></x-cross></span>
+                            <span x-show="!success && pass"><x-hand></x-hand></span>
                         </div>
                     </div>
                     <div x-show="isLoading">

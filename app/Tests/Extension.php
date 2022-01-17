@@ -31,9 +31,9 @@ class Extension implements Test
                 }
             }
 
-            $message .= sprintf("PHP: %s - MISSING EXTENSIONS:\n  %s\n", phpversion(), join("\n  ", $oops));
+            $message .= sprintf("PHP: %s - MISSING EXTENSIONS:<br>  %s<br>", phpversion(), join("<br>  ", $oops));
             if (count($possibleDynamicMatches)) {
-                $message .= sprintf("PHP: %s - possible matches:\n  %s\n", phpversion(), join("\n  ", $possibleDynamicMatches));
+                $message .= sprintf("PHP: %s - possible matches:<br>  %s<br>", phpversion(), join("<br>  ", $possibleDynamicMatches));
             }
 
             if (count($iniExpected)) {
@@ -44,13 +44,13 @@ class Extension implements Test
                     }
                 }
                 if (count($disabled)) {
-                    $message .= sprintf("PHP: %s - EXPECTED EXTENSIONS:\n  %s\n", phpversion(), join("\n  ", $disabled));
+                    $message .= sprintf("PHP: %s - EXPECTED EXTENSIONS:<br>  %s<br>", phpversion(), join("<br>  ", $disabled));
                 }
             }
 
         } else {
             $success = true;
-            $message .= sprintf("PHP: %s - Required extensions have been detected, all is good! ✅\n%s\n",
+            $message .= sprintf("PHP: %s - Required extensions have been detected, all is good! ✅<br>%s<br>",
                 phpversion(),
                 wordwrap(join(' ', array_keys($expected)), 74)
             );

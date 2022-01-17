@@ -51,7 +51,7 @@ class ImagickTest implements Test
                         $new = 'imagick/tmp/' . uniqid('img.', true);
                         $created[] = $new;
                         $i->thumbnailImage(1000, 1600, true, false);
-                        $i->writeImage($new . '.webp');
+                        $i->writeImage(__DIR__ . '/../../public/' . $new . '.webp');
                     } catch(\Exception $e) {
                         $success = false;
                         $message .= $e->getMessage();

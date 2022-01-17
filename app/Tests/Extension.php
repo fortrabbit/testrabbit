@@ -50,7 +50,7 @@ class Extension implements Test
 
         } else {
             $success = true;
-            $message .= sprintf("PHP: %s - Required extensions have been detected, all is good! ✅<br>%s<br>",
+            $message .= sprintf("PHP: %s - Required extensions have been detected, all is good!<br>%s<br>",
                 phpversion(),
                 wordwrap(join(' ', array_keys($expected)), 74)
             );

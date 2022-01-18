@@ -48,7 +48,7 @@ class ImagickTest implements Test
                     $i = new Imagick($path);
 
                     try {
-                        $new = 'imagick/tmp/' . uniqid('img.', true);
+                        $new = config('imagick.tempLocation') . uniqid('img.', true);
                         $created[] = $new;
                         $i->thumbnailImage(1000, 1600, true, false);
                         $i->writeImage(__DIR__ . '/../../public/' . $new . '.webp');

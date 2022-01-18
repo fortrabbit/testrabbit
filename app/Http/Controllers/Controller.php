@@ -10,6 +10,8 @@ class Controller extends BaseController
 {
     public function index()
     {
+        $this->deleteTempImages();
+
         $tests = [
             'Extensions' => 'Extension',
             'Memcached' => 'Memcached',
@@ -48,5 +50,16 @@ class Controller extends BaseController
             'pass' => false,
             'message' => $result->getMessage(),
         ]);
+    }
+
+    private function deleteTempImages(): void
+    {
+        $location = __DIR__ . '/../../../public/' . config('imagick.tempLocation');
+        $files = glob($location . '/*.webp');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
     }
 }

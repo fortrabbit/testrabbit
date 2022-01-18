@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^.*\.frb\.io$ [NC]
+RewriteRule .* https://www.your-domain.example%{REQUEST_URI} [r=301,L,N]

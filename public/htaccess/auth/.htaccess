@@ -1,0 +1,4 @@
+Authtype Basic
+AuthName "Welcome to my awesome project. Please Login."
+AuthUserFile /srv/app/usx-testing/htdocs/public/htaccess/.htpasswd
+Require valid-user

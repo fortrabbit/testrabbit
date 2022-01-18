@@ -18,7 +18,7 @@
 </head>
 <body>
     <div class="relative flex justify-center min-h-screen bg-gray-100 sm:items-center py-4 sm:pt-0">
-        <div class="w-2/3 mx-auto">
+        <div class="w-2/3 mx-auto pt-4">
             @foreach ($tests as $name => $test)
                 <div
                     x-cloak
@@ -42,6 +42,72 @@
                     <div x-show="!isLoading" x-html="message" class="max-h-72 overflow-y-auto"></div>
                 </div>
             @endforeach
+            <h2 class="text-lg font-bold">Additional test tools</h2>
+            <ul>
+                <li class="mt-2 flex">
+                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/htaccess/https-redirect" target="_blank">Test HTTPS redirect</a>
+                    <x-link></x-link>
+                </li>
+                <li class="mt-2 flex">
+                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/htaccess/custom-404/not-found" target="_blank">Test custom 404</a>
+                    <x-link></x-link>
+                </li>
+                <li class="mt-2 flex">
+                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/htaccess/domain-redirect/" target="_blank">Test domain redirect</a>
+                    <x-link></x-link>
+                </li>
+                <li class="mt-2 flex">
+                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="info.php" target="_blank">PHP info</a>
+                    <x-link></x-link>
+                </li>
+            </ul>
+            <h3 class="text-lg font-bold mt-4 mb-2">Test Workers</h3>
+            <ol class="list-decimal ml-5">
+                <li>Open one of the Testrabbit Pro apps, or create a new one</li>
+                <li>
+                    Create one nonstop job with SIGTERM - 10 sec<br>
+                    <code>artisan queue:work --sleep=5</code>
+                </li>
+                <li>
+                    Create one cronjob<br>
+                    <code>artisan schedule:run</code>
+                </li>
+                <li>
+                    Open a tail for the worker logs to watch for output<br>
+                    <code>ssh testrabbit-us1@log.us1.frbit.com tail source:worker</code>
+                </li>
+                <li>
+                    Run these ssh commands to create worker jobs<br>
+                    <code>ssh testrabbit-us1@deploy.us1.frbit.com "php artisan test:job sleep -C 5"</code><br>
+                    <code>ssh testrabbit-us1@deploy.us1.frbit.com "php artisan test:job error -C 10"</code>
+                </li>
+            </ol>
+
+            <h3 class="text-lg font-bold mt-4 mb-2">Test cli commands</h3>
+            <pre>
+# Creates two dummy job with StdOut
+php artisan test:job sleep -C 2
+
+# Creates 10 jobs random with StdErr + Exceptions
+php artisan test:job error -C 10
+
+# Creates a jobs some memory consumption (64,512MB)
+php artisan test:job memory --args=64
+php artisan test:job memory --args=512
+
+# Mongo connection test (deploy)
+php artisan test:mongo
+
+# Mongo connection test (Worker)
+php artisan test:mongo --queued
+
+# Handle queued jobs
+php artisan queue:work
+php artisan queue:cleanup
+
+# Run migrations (if any)
+php artisan migrate --force
+            </pre>
         </div>
     </div>
 </body>

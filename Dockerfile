@@ -24,13 +24,6 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     imagemagick \
     libmagickwand-dev
 
-# Install composer
-ENV COMPOSER_VERSION=2.0.12
-ENV COMPOSER_SHA256=82ea8c1537cfaceb7e56f6004c7ccdf99ddafce7237c07374d920e635730a631
-RUN wget -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && \
-    echo "$COMPOSER_SHA256  /usr/local/bin/composer" | sha256sum --check && \
-    chmod +x /usr/local/bin/composer
-
 # Image Magick version 7 has not been packaged for Ubuntu yet, so we build our own.
 # Here using `mk-build-deps` to automatically install all build dependencies of imagemagick.
 #RUN ai \
@@ -55,13 +48,14 @@ RUN docker-php-ext-install \
 
 RUN pecl install apcu &&\
     pecl install mongodb &&\
-    docker-php-ext-enable apcu mongodb
+    pecl install imagick &&\
+    docker-php-ext-enable apcu mongodb imagick
 
 # use github version for now until release from https://pecl.php.net/get/imagick is ready for PHP 8
-RUN mkdir -p /usr/src/php/ext/imagick; \
-    curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz \
-        | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
-    docker-php-ext-install imagick
+#RUN mkdir -p /usr/src/php/ext/imagick; \
+#    curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz \
+#        | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
+#    docker-php-ext-install imagick
 
 # Get the version of mysql client that we actually run in production
 # https://geert.vanderkelen.org/2018/mysql8-unattended-dpkg/
@@ -77,6 +71,13 @@ RUN mkdir -p /usr/src/php/ext/imagick; \
 # Configure apache
 RUN a2enmod rewrite
 ADD docker/apache.conf /etc/apache2/sites-enabled/000-default.conf
+
+# Install composer
+ENV COMPOSER_VERSION=2.2.7
+ENV COMPOSER_SHA256=10040ded663541990eef8ce1f6fa44cb3b4a47e145efb8e9e59907a15068033d
+RUN wget -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar && \
+    echo "$COMPOSER_SHA256  /usr/local/bin/composer" | sha256sum --check && \
+    chmod +x /usr/local/bin/composer
 
 # Set up users that works on linux and in github actions
 RUN groupadd user -g 1000 && \

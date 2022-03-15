@@ -1,4 +1,4 @@
-PHP_VERSION ?= "8.0"
+PHP_VERSION ?= "8.1"
 DOCKER_USER ?= 1000
 
 test: install

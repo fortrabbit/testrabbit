@@ -61,7 +61,11 @@ class Extension implements Test
 
     private function discoverMissingExtensions(): array
     {
-        $removed_in['7.4.0'] = ['wddx', 'phalcon'];
+        $removed_in = [
+            '7.4.0' => ['wddx'],
+            '8.0.0' => ['phalcon'],
+            '8.1.0' => ['geoip'],
+        ];
 
         $expected = [
             'bcmath' => 1,

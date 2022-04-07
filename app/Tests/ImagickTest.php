@@ -66,10 +66,14 @@ class ImagickTest implements Test
 
                 }
             }
-
+            // Show images
+            $message .= '<div style="display:flex">';
             foreach ($created as $ii) {
-                $message .= '<img src="' . $ii . '.webp">';
+                $message .= '<li style="height:40vh;flex-grow:1;list-style-type:none">';
+                $message .= '<img src="' . $ii . '.webp" style="object-fit:cover;max-height:100%;mix-width:100%;vertical-align:bottom">';
+                $message .= '</li>';
             }
+            $message .= '</div>';
         } catch (\Exception $e) {
             $success = false;
             $message = $e->getMessage();

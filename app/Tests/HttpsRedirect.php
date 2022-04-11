@@ -22,6 +22,7 @@ class HttpsRedirect extends StatusCodeTest implements Test
             $httpResponse = $this->call($url, false);
             $message = $httpResponse->getBody();
             if ($httpResponse->getStatus() != $this->expectedStatus) {
+                $success = false;
                 $message = $this->buildFailedTestMessage('Status', $this->expectedStatus, $httpResponse->getStatus());
             }
         } catch (\Exception $e) {

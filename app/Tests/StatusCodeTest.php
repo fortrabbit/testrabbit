@@ -33,7 +33,7 @@ class StatusCodeTest
         curl_setopt($handler, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($handler);
         $status = curl_getinfo($handler, CURLINFO_HTTP_CODE);
-        $finalUrl = curl_getinfo($handler, CURLINFO_EFFECTIVE_URL);
+        $finalUrl = curl_getinfo($handler, CURLINFO_REDIRECT_URL);
         curl_close($handler);
 
         return new HttpResponse($status, $response, $finalUrl);

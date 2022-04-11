@@ -24,6 +24,7 @@ class Custom404 extends StatusCodeTest implements Test
             $httpResponse = $this->call($url, true);
             $message = '';
             if ($httpResponse->getStatus() != $this->expectedStatus) {
+                $success = false;
                 $message = $this->buildFailedTestMessage('Status', $this->expectedStatus, $httpResponse->getStatus());
             }
             if (! str_contains($httpResponse->getBody(), $this->pageContains)) {

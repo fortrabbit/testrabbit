@@ -23,6 +23,7 @@ class DomainRedirect extends StatusCodeTest implements Test
             $url = $this->scheme . '://' . $_SERVER['HTTP_HOST'] . $this->url;
             $httpResponse = $this->call($url, false);
             $message = '';
+            $success = true;
             if ($httpResponse->getStatus() != $this->expectedStatus) {
                 $success = false;
                 $message = $this->buildFailedTestMessage('Status', $this->expectedStatus, $httpResponse->getStatus());

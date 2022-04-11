@@ -20,6 +20,7 @@ class Controller extends BaseController
             'MySQL' => 'MySQL',
             'Imagick' => 'ImagickTest',
             'HTTPS Redirect' => 'HttpsRedirect',
+            'Custom 404 page' => 'Custom404',
         ];
 
         return view('index', [

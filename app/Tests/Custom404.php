@@ -2,7 +2,7 @@
 
 namespace App\Tests;
 
-class Custom404 extends StatusCodeTest
+class Custom404 extends StatusCodeTest implements Test
 {
     protected string $scheme;
     protected string $url;
@@ -21,12 +21,18 @@ class Custom404 extends StatusCodeTest
     {
         try {
             $url = $this->scheme . '://' . $_SERVER['HTTP_HOST'] . $this->url;
-            $httpResponse = $this->call($url);
-            $success = $httpResponse->getStatus() == $this->expectedStatus;
+            $httpResponse = $this->call($url, true);
+            $message = '';
+            if ($httpResponse->getStatus() != $this->expectedStatus) {
+                $message = $this->buildFailedTestMessage('Status', $this->expectedStatus, $httpResponse->getStatus());
+            }
             if (! str_contains($httpResponse->getBody(), $this->pageContains)) {
                 $success = false;
+                $message .= $this->buildFailedTestMessage('Page content', $this->pageContains, $httpResponse->getBody());
             }
-            $message = $httpResponse->getBody();
+            if ($success) {
+                $message = $httpResponse->getBody();
+            }
         } catch (\Exception $e) {
             $success = false;
             $message = $e->getMessage();

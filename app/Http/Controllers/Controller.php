@@ -21,6 +21,7 @@ class Controller extends BaseController
             'Imagick' => 'ImagickTest',
             'HTTPS Redirect' => 'HttpsRedirect',
             'Custom 404 page' => 'Custom404',
+            'Domain Redirect' => 'DomainRedirect',
         ];
 
         return view('index', [

@@ -2,17 +2,19 @@
 
 namespace App\Tests;
 
-class HttpsRedirect extends StatusCodeTest implements Test
+class DomainRedirect extends StatusCodeTest implements Test
 {
     protected string $scheme;
     protected string $url;
     protected int $expectedStatus;
+    protected string $expectedRedirectUrl;
 
     public function __construct()
     {
-        $this->scheme = 'http';
-        $this->url = '/htaccess/https-redirect/index.html';
+        $this->scheme = 'https';
+        $this->url = '/htaccess/domain-redirect/';
         $this->expectedStatus = 301;
+        $this->expectedRedirectUrl = 'https://www.your-domain.example/htaccess/domain-redirect/';
     }
 
     public function execute(): Result
@@ -20,9 +22,16 @@ class HttpsRedirect extends StatusCodeTest implements Test
         try {
             $url = $this->scheme . '://' . $_SERVER['HTTP_HOST'] . $this->url;
             $httpResponse = $this->call($url, false);
-            $message = $httpResponse->getBody();
+            $message = '';
             if ($httpResponse->getStatus() != $this->expectedStatus) {
                 $message = $this->buildFailedTestMessage('Status', $this->expectedStatus, $httpResponse->getStatus());
+            }
+            if ($httpResponse->getUrl() !== $this->expectedRedirectUrl) {
+                $success = false;
+                $message .= $this->buildFailedTestMessage('Redirect URL', $this->expectedRedirectUrl, $httpResponse->getUrl());
+            }
+            if ($success) {
+                $message = $httpResponse->getBody();
             }
         } catch (\Exception $e) {
             $success = false;

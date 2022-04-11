@@ -19,6 +19,7 @@ class Controller extends BaseController
             'MongoDB' => 'MongoDB',
             'MySQL' => 'MySQL',
             'Imagick' => 'ImagickTest',
+            'HTTPS Redirect' => 'HttpsRedirect',
         ];
 
         return view('index', [

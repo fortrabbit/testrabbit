@@ -14,7 +14,7 @@ class JobTestCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'test:job {type : Type of job (error|sleep)} {--C|count=1} {--A|args=*}';
+    protected $signature = 'do:job {type : Type of job (error|sleep)} {--C|count=1} {--A|args=*}';
 
     /**
      * The console command description.

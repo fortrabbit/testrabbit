@@ -1,4 +1,5 @@
 <?php
+error_log(__FILE__);
 
 /**
  * Laravel - A PHP Framework For Web Artisans

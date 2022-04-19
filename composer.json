@@ -5,15 +5,22 @@
     "license": "MIT",
     "type": "project",
     "require": {
+        "php": "~7.1",
         "ext-apcu": "*",
         "ext-imagick": "*",
-        "fakerphp/faker": "^1.13",
         "fideloper/proxy": "^4.0",
-        "laravel/framework": "^8.0",
-        "laravel/helpers": "^1.4",
-        "laravel/tinker": "*",
+        "fzaninotto/faker": "^1.8",
+        "laravel/framework": "5.7.*",
+        "laravel/tinker": "^1.0",
         "mongodb/mongodb": "^1.4",
-        "rcrowe/twigbridge": "*"
+        "rcrowe/twigbridge": "^0.9.8"
+    },
+    "require-dev": {
+        "beyondcode/laravel-dump-server": "^1.0",
+        "filp/whoops": "^2.0",
+        "mockery/mockery": "^1.0",
+        "nunomaduro/collision": "^2.0",
+        "phpunit/phpunit": "^7.0"
     },
     "autoload": {
         "classmap": [

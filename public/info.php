@@ -1,5 +1,5 @@
 <?php
 
-error_log('Someone visited testrabbit!');
+error_log('Someone visited autotestrabbit!');
 
 phpinfo();

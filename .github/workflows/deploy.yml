@@ -1,0 +1,54 @@
+name: Deploy
+env:
+  SLACK_HOOK_URL: "https://hooks.slack.com/services/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"
+  SLACK_PROJECT_NAME: "testrabbit"
+
+on:
+  push:
+    branches:
+      - develop
+      - production
+    tags:
+      - '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-?*'
+
+jobs:
+  deployment:
+    runs-on: ubuntu-22.04
+    env:
+      SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    steps:
+      -   name: 'Checkout'
+          uses: 'actions/checkout@v1'
+
+      -   name: Setup SSH Keys and known_hosts
+          run: |
+            ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+            ssh-add - <<EOF
+            ${{ secrets.SSH_PRIVATE_KEY }}
+            EOF
+
+      -   name: 'Run deployment for develop branch'
+          if: ${{ github.ref == 'refs/heads/develop' && env.release_branch_exists != 'true' }}
+          run: |
+            git push --force testrabbit-pro@deploy.usx.frbit.com:testrabbit-pro.git HEAD:master
+            git push --force testrabbit-uni@deploy.usx.frbit.com:testrabbit-uni.git HEAD:master
+            echo "slack_environment=USX" >> $GITHUB_ENV
+
+      -   name: 'Run deployment for production branch'
+          if: ${{ startsWith(github.ref, 'refs/tags/') }}
+          run: |
+            git push --force testrabbit-pro@deploy.eu2.frbit.com:testrabbit-pro.git HEAD:master
+            git push --force testrabbit-uni@deploy.eu2.frbit.com:testrabbit-uni.git HEAD:master
+            git push --force testrabbit-us1@deploy.us1.frbit.com:testrabbit-us1.git HEAD:master
+            git push --force testrabbit-us1-u@deploy.us1.frbit.com:testrabbit-us1-u.git HEAD:master
+            echo "slack_environment=PRODUCTION" >> $GITHUB_ENV
+
+      -   name: 'Send Slack message'
+          run: |
+            export short_sha=$(git rev-parse --short HEAD);
+            export commit_message=$(git -P show -s --format=%s ${short_sha});
+            if [ -z "$slack_message" ]; then
+                export slack_message="*${SLACK_PROJECT_NAME}* was deployed to *${slack_environment}* at commit \`${short_sha} ${commit_message}\`";
+            fi
+            curl -X POST --data-urlencode "payload={\"channel\": \"#fr-deploy\", \"username\": \"github-actions\", \"text\": \"${slack_message}\"}" ${SLACK_HOOK_URL}

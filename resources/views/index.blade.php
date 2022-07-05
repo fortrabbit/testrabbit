@@ -45,18 +45,6 @@
             <h2 class="text-lg font-bold">Additional test tools</h2>
             <ul>
                 <li class="mt-2 flex">
-                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/htaccess/https-redirect" target="_blank">Test HTTPS redirect</a>
-                    <x-link></x-link>
-                </li>
-                <li class="mt-2 flex">
-                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/htaccess/custom-404/not-found" target="_blank">Test custom 404</a>
-                    <x-link></x-link>
-                </li>
-                <li class="mt-2 flex">
-                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/htaccess/domain-redirect/" target="_blank">Test domain redirect</a>
-                    <x-link></x-link>
-                </li>
-                <li class="mt-2 flex">
                     <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="info.php" target="_blank">PHP info</a>
                     <x-link></x-link>
                 </li>

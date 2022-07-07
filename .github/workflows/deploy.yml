@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+      GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PubkeyAcceptedKeyTypes=+ssh-rsa"
     steps:
       -   name: 'Checkout'
           uses: 'actions/checkout@v1'
@@ -28,6 +28,7 @@ jobs:
             ssh-add - <<EOF
             ${{ secrets.SSH_PRIVATE_KEY }}
             EOF
+            ssh-add -l
 
       -   name: 'Run deployment to USX'
           if: ${{ github.ref == 'refs/heads/master' }}

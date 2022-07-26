@@ -1,6 +1,4 @@
-# Auto Test Rabbit
-
-A version of https://github.com/fortrabbit/testrabbit with a few of the tests automated.
+# Test Rabbit
 
 ## Development
 

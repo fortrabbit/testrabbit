@@ -32,8 +32,8 @@ class GD implements Test
                         $im = imagescale( $im, 1000, 1600 );
                         $bytes = filesize($path);
 
-                        $new = config('gd.tempLocation') . uniqid('img.', true) . '.webp';
-                        $success = imagewebp($im, $new);
+                        $new = config('gd.tempLocation') . uniqid('img.', true) . '.jpeg';
+                        $success = imagejpeg($im, $new);
                         $created[] = $new;
 
                     } catch(\Exception $e) {

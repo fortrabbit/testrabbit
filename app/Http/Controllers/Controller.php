@@ -19,6 +19,7 @@ class Controller extends BaseController
             'MongoDB' => 'MongoDB',
             'MySQL' => 'MySQL',
             'Imagick' => 'ImagickTest',
+            'GD' => 'GD',
             'HTTPS Redirect' => 'HttpsRedirect',
             'Custom 404 page' => 'Custom404',
             'Domain Redirect' => 'DomainRedirect',
@@ -57,12 +58,19 @@ class Controller extends BaseController
 
     private function deleteTempImages(): void
     {
-        $location = __DIR__ . '/../../../public/' . config('imagick.tempLocation');
-        $files = glob($location . '/*.webp');
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file);
+        $locations = [
+            __DIR__ . '/../../../public/' . config('imagick.tempLocation'),
+            __DIR__ . '/../../../public/' . config('gd.tempLocation')
+        ];
+
+        foreach ($locations as $location) {
+            $files = glob($location . '/*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
             }
         }
+
     }
 }

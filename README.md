@@ -29,7 +29,19 @@ This repo is already deployed to Apps in all regions and whenever you push to th
     - [https://dashboard-dev.frbit.com/apps/testrabbit-pro](https://dashboard-dev.frbit.com/apps/testrabbit-pro)
     - [https://dashboard-dev.frbit.com/apps/testrabbit-uni](https://dashboard-dev.frbit.com/apps/testrabbit-uni)
 
+To set up in git:
+
+    git remote add eu       testrabbit-uni@deploy.eu2.frbit.com:testrabbit-uni.git
+    git remote add eu2-pro  testrabbit-pro@deploy.eu2.frbit.com:testrabbit-pro.git
+    git remote add origin   git@github.com:fortrabbit/testrabbit.git
+    git remote add us-pro   testrabbit-us1@deploy.us1.frbit.com:testrabbit-us1.git
+    git remote add us-uni   testrabbit-us1-u@deploy.us1.frbit.com:testrabbit-us1-u.git
+    git remote add usx      testrabbit-uni@deploy.usx.frbit.com:testrabbit-uni.git
+    git remote add usx-pro  testrabbit-pro@deploy.usx.frbit.com:testrabbit-pro.git
+
+
 ### Initial setup for a new App
 
 The app expects an environment variable: `APP_TYPE`. Possible values are `uni` or `pro`.
+
 

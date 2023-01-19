@@ -20,14 +20,14 @@ This repo is already deployed to Apps in all regions and whenever you push to th
 
 ### Live Apps
 - eu2
-    - [https://dashboard.fortrabbit.com/apps/testrabbit-pro](https://dashboard.fortrabbit.com/apps/testrabbit-pro)
-    - [https://dashboard.fortrabbit.com/apps/testrabbit-uni](https://dashboard.fortrabbit.com/apps/testrabbit-uni)
+    - [Dashboard testrabbit-pro](https://dashboard.fortrabbit.com/apps/testrabbit-pro) - https://testrabbit-pro.frb.io/
+    - [Dashboard testrabbit-uni](https://dashboard.fortrabbit.com/apps/testrabbit-uni) -https://testrabbit-uni.frb.io/
 - us1
-    - [https://dashboard.fortrabbit.com/apps/testrabbit-us1](https://dashboard.fortrabbit.com/apps/testrabbit-us1)
-    - [https://dashboard.fortrabbit.com/apps/testrabbit-us1-u](https://dashboard.fortrabbit.com/apps/testrabbit-us1-u)
+    - [Dashboard testrabbit-us1](https://dashboard.fortrabbit.com/apps/testrabbit-us1) - https://testrabbit-us1.frb.io/
+    - [Dashboard testrabbit-us1-u](https://dashboard.fortrabbit.com/apps/testrabbit-us1-u) - https://testrabbit-us1-u.frb.io/
 - usx
-    - [https://dashboard-dev.frbit.com/apps/testrabbit-pro](https://dashboard-dev.frbit.com/apps/testrabbit-pro)
-    - [https://dashboard-dev.frbit.com/apps/testrabbit-uni](https://dashboard-dev.frbit.com/apps/testrabbit-uni)
+    - [Dashboard testrabbit-pro](https://dashboard-dev.frbit.com/apps/testrabbit-pro) - 
+    - [Dashboard testrabbit-uni](https://dashboard-dev.frbit.com/apps/testrabbit-uni) - 
 
 To set up in git:
 

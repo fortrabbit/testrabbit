@@ -1,5 +1,4 @@
-PHP_VERSION ?= "8.1"
-DOCKER_USER ?= 1000
+PHP_VERSION ?= "8.2"
 
 test: install
 
@@ -10,7 +9,7 @@ endif
 
 install: build
 ifdef GITHUB_ACTIONS
-	docker-compose run --user=${DOCKER_USER} --rm php bash -c '\
+	docker-compose run --rm php bash -c '\
 	  composer config -g github-oauth.github.com ${GITHUB_AUTH} && \
 	  composer install --no-interaction --prefer-dist --no-scripts --no-cache'
 else

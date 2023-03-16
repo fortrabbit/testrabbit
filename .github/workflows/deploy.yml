@@ -1,9 +1,10 @@
-name: Deploy
+name: Test & Deploy
 env:
   SLACK_HOOK_URL: "https://hooks.slack.com/services/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"
   SLACK_PROJECT_NAME: "testrabbit"
   SSH_AUTH_SOCK: /tmp/ssh_agent.sock
   GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PubkeyAcceptedKeyTypes=+ssh-rsa"
+  DOCKER_REGISTRY_IMAGE: ghcr.io/fortrabbit/testrabbit
 
 on:
   push:
@@ -15,11 +16,52 @@ on:
       - '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-?*'
 
 jobs:
+
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        php-version: ['7.4','8.0','8.1','8.2']
+
+    steps:
+      - uses: actions/checkout@v3
+
+      -   name: Login to GitHub Container Registry
+          uses: docker/login-action@v2
+          with:
+            registry: ghcr.io
+            username: ${{ github.repository_owner }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build docker image using Github Packages as cache
+        run: |
+          export PHP_VERSION=${{ matrix.php-version }}
+          docker pull $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} || true
+          cd docker/$PHP_VERSION
+          docker build --build-arg PHP_VERSION=${PHP_VERSION} \
+            --cache-from $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} \
+            --tag $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} \
+            --tag $DOCKER_REGISTRY_IMAGE:latest .
+          docker push $DOCKER_REGISTRY_IMAGE:${PHP_VERSION}
+
+      - name: Cache vendor folder
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: vendor-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}
+
+      - name: Install dependencies
+        run: |
+          export PHP_VERSION=${{ matrix.php-version }}
+          GITHUB_AUTH=${{ secrets.ACTIONS_TOKEN }} make install
+
+
   usx:
     runs-on: ubuntu-22.04
+    needs: test
     steps:
-      -   name: 'Checkout'
-          uses: 'actions/checkout@v1'
+      -   name: Checkout
+          uses: actions/checkout@v3
 
       -   name: Setup SSH Keys and known_hosts
           run: |
@@ -49,9 +91,10 @@ jobs:
 
   eu2:
     runs-on: ubuntu-22.04
+    needs: test
     steps:
-      -   name: 'Checkout'
-          uses: 'actions/checkout@v1'
+      -   name: Checkout
+          uses: actions/checkout@v3
 
       -   name: Setup SSH Keys and known_hosts
           run: |
@@ -82,9 +125,10 @@ jobs:
 
   us1:
     runs-on: ubuntu-22.04
+    needs: test
     steps:
-      -   name: 'Checkout'
-          uses: 'actions/checkout@v1'
+      -   name: Checkout
+          uses: actions/checkout@v3
 
       -   name: Setup SSH Keys and known_hosts
           run: |

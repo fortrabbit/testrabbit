@@ -15,39 +15,76 @@ class GD implements Test
             $message .= print_r(gd_info(), true);
             $message .=  '</pre>';
 
-            $paths = glob('imagick/*.jpg');
+            $paths = glob('imagick/*');
             $created = [];
+            $message .= '<hr>';
+            $formats = ['webp','jpeg'];
+            if(function_exists('imageavif')) $formats[] = 'avif';
 
-                $message .= '<hr>';
+            foreach ($paths as $path) {
 
-                foreach ($paths as $path) {
+                if (is_dir($path)) continue;
 
-                    if (is_dir($path)) continue;
+                $start = microtime(true);
 
-                    $start = microtime(true);
+                try {
 
-                    try {
-
-                        $im = imagecreatefromjpeg($path);
-                        $im = imagescale( $im, 1000, 1600 );
-                        $bytes = filesize($path);
-
-                        $new = config('gd.tempLocation') . uniqid('img.', true) . '.jpeg';
-                        $success = imagejpeg($im, $new);
-                        $created[] = $new;
-
-                    } catch(\Exception $e) {
-                        $message .= $e->getMessage();
+                    $bytes = filesize($path);
+                    $sourceFormat = substr($path, strrpos($path, '.')+1);
+                    switch ($sourceFormat) {
+                        case 'jpg':
+                        case 'jpeg':
+                            $im = imagecreatefromjpeg($path);
+                            break;
+                        case 'png':
+                            $im = imagecreatefrompng($path);
+                            break;
+                        case 'webp':
+                            $im = imagecreatefromwebp($path);
+                            break;
+                        case 'heic':
+                            $message .= $path . ' HEIC format not supported<br>';
+                            continue 2;
+                        case 'avif':
+                            $message .= $path . ' AVIF format not supported<br>';
+                            continue 2;
+                        default:
+                            $message .= $path . ' uknown format not supported<br>';
+                            continue 2;
                     }
 
-                    $message .= sprintf(
-                        '%s <b>%s</b> done in %f ms<br>',
-                        $path,
-                        $this->human_filesize($bytes),
-                        (microtime(true) - $start)
-                    );
+                    $im = imagescale( $im, 1000, 1600 );
 
+                    $format = $formats[array_rand($formats)];
+                    $new = config('gd.tempLocation') . uniqid('img.', true) . '.' . $format;
+                    switch ($format) {
+                        case 'jpeg':
+                            $success = imagejpeg($im, $new);
+                            break;
+                        case 'webp':
+                            $success = imagewebp($im, $new);
+                            break;
+                        case 'avif':
+                            $success = imageavif($im, $new);
+                            break;
+                        default:
+                            throw new \Exception('Unexpected image format');
+                    }
+                    $created[] = $new;
+
+                } catch(\Exception $e) {
+                    $message .= $e->getMessage();
                 }
+
+                $message .= sprintf(
+                    '%s <b>%s</b> to <b>%s</b> done in %f ms<br>',
+                    $path,
+                    $this->human_filesize($bytes),
+                    $format,
+                    (microtime(true) - $start)
+                );
+
+            }
 
             // Show images
             $message .= '<div style="display:flex">';

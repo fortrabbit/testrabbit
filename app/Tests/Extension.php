@@ -63,7 +63,6 @@ class Extension implements Test
     {
         $removed_in = [
             '7.4.0' => ['wddx'],
-            '8.0.0' => ['phalcon'],
             '8.1.0' => ['geoip'],
         ];
 

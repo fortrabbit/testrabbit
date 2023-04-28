@@ -90,7 +90,7 @@ class GD implements Test
             $message .= '<div style="display:flex">';
             foreach ($created as $ii) {
                 $message .= '<li style="height:40vh;flex-grow:1;list-style-type:none">';
-                $message .= '<img src="' . $ii . '" style="object-fit:cover;max-height:100%;mix-width:100%;vertical-align:bottom">';
+                $message .= '<img src="' . $ii . '" alt="' . $ii . '" style="object-fit:cover;max-height:100%;mix-width:100%;vertical-align:bottom">';
                 $message .= '</li>';
             }
             $message .= '</div>';

@@ -29,6 +29,7 @@ RUN apt-get update \
        php7.4-intl php7.4-readline php7.4-pcov \
        php7.4-msgpack php7.4-igbinary php7.4-ldap \
        php7.4-redis php7.4-xdebug \
+       php7.4-imagick php7.4-apcu php7.4-mongodb \
     && php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer \
 #    && curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - \
 #    && apt-get install -y nodejs \

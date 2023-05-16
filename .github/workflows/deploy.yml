@@ -34,8 +34,9 @@ jobs:
             password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build docker image using Github Packages as cache
+        env:
+          PHP_VERSION: ${{ matrix.php-version }}
         run: |
-          export PHP_VERSION=${{ matrix.php-version }}
           docker pull $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} || true
           cd docker/$PHP_VERSION
           docker build --build-arg PHP_VERSION=${PHP_VERSION} \
@@ -52,8 +53,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          export PHP_VERSION=${{ matrix.php-version }}
-          GITHUB_AUTH=${{ secrets.ACTIONS_TOKEN }} make install
+          docker run --rm \
+            -v $PWD:/var/www/html \
+            $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} \
+            bash -c '\
+            composer config -g github-oauth.github.com ${{ secrets.ACTIONS_TOKEN }} && \
+            composer install --no-interaction --prefer-dist --no-scripts --no-cache'
 
 
   usx:

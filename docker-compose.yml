@@ -7,7 +7,7 @@ services:
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: sail-8.1/app
+        image: ghcr.io/fortrabbit/testrabbit:7.4
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -18,7 +18,7 @@ services:
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
         volumes:
-            - '.:/var/www/html'
+            - './:/var/www/html'
         networks:
             - sail
 networks:

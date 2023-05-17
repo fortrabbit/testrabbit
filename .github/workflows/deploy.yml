@@ -67,6 +67,9 @@ jobs:
     steps:
       -   name: Checkout
           uses: actions/checkout@v3
+          with:
+            # fetch all history so we can push to remotes
+            fetch-depth: 0
 
       -   name: Setup SSH Keys and known_hosts
           run: |
@@ -100,6 +103,9 @@ jobs:
     steps:
       -   name: Checkout
           uses: actions/checkout@v3
+          with:
+            # fetch all history so we can push to remotes
+            fetch-depth: 0
 
       -   name: Setup SSH Keys and known_hosts
           run: |
@@ -134,6 +140,9 @@ jobs:
     steps:
       -   name: Checkout
           uses: actions/checkout@v3
+          with:
+            # fetch all history so we can push to remotes
+            fetch-depth: 0
 
       -   name: Setup SSH Keys and known_hosts
           run: |

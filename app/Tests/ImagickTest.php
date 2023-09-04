@@ -34,7 +34,11 @@ class ImagickTest implements Test
             $created = [];
             $supportedSourceFormats = ['jpeg','jpg','png','webp'];
             $targetFormats = ['jpeg','webp'];
-            if (config('fortrabbit.platform') == PLATFORM_NEW) {
+            if (in_array(config('fortrabbit.platform'), [PLATFORM_UBUNTU20])) {
+                $supportedSourceFormats = ['jpeg','jpg','png','webp','heic'];
+                $targetFormats = ['jpeg','webp','heic'];
+            }
+            if (in_array(config('fortrabbit.platform'),  [PLATFORM_K8S, PLATFORM_UBUNTU22])) {
                 $supportedSourceFormats = ['jpeg','jpg','png','webp','avif','heic'];
                 $targetFormats = ['jpeg','webp','avif','heic'];
             }

@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Tests\Test;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 
 class Controller extends BaseController
 {
     public function index()
     {
+        // Stupid log entry to check if log tailing works
+        Log::info('We have visitors!');
+
         $this->deleteTempImages();
 
         $tests = [

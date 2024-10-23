@@ -2,11 +2,10 @@
 version: 2
 
 # called before Composer runs, so dependencies/libraries not guaranteed to be in place (must be a single PHP script)
-pre: hello.php
+pre: fortrabbit-pre.php
 
 # optional Composer settings
 composer:
-
   # Per default dist is preferred
   prefer-source: false
 
@@ -20,7 +19,7 @@ composer:
   no-scripts: false
 
 # called after Composer runs (must be a single PHP script)
-post: hello.php
+post: fortrabbit-post.php
 
 # list of sustained folders in ~/htdocs. If not given, then it defaults to the "vendor" folder
 sustained:

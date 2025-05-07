@@ -6,7 +6,6 @@
     "license": "MIT",
     "require": {
         "php": "^7.4|^8.0",
-        "ext-apcu": "*",
         "ext-gd": "*",
         "ext-imagick": "*",
         "fakerphp/faker": "^1.17",

@@ -1,7 +1,5 @@
 name: Test & Deploy
 env:
-  SLACK_HOOK_URL: "https://hooks.slack.com/services/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"
-  SLACK_PROJECT_NAME: "testrabbit"
   SSH_AUTH_SOCK: /tmp/ssh_agent.sock
   GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PubkeyAcceptedKeyTypes=+ssh-rsa"
   DOCKER_REGISTRY_IMAGE: ghcr.io/fortrabbit/testrabbit
@@ -87,16 +85,6 @@ jobs:
           run: |
             git push --force testrabbit-uni@deploy.usx.frbit.com:testrabbit-uni.git HEAD:master
 
-      -   name: 'Send Slack message'
-          run: |
-            echo "slack_environment=USX" >> $GITHUB_ENV
-            export short_sha=$(git rev-parse --short HEAD);
-            export commit_message=$(git -P show -s --format=%s ${short_sha});
-            if [ -z "$slack_message" ]; then
-                export slack_message="*${SLACK_PROJECT_NAME}* was deployed to *${slack_environment}* at commit \`${short_sha} ${commit_message}\`";
-            fi
-            curl -X POST --data-urlencode "payload={\"channel\": \"#fr-deploy\", \"username\": \"github-actions\", \"text\": \"${slack_message}\"}" ${SLACK_HOOK_URL}
-
   eu2:
     runs-on: ubuntu-22.04
     needs: test
@@ -124,16 +112,6 @@ jobs:
           run: |
             git push --force testrabbit-uni@deploy.eu2.frbit.com:testrabbit-uni.git HEAD:master
 
-      -   name: 'Send Slack message'
-          run: |
-            echo "slack_environment=EU2" >> $GITHUB_ENV
-            export short_sha=$(git rev-parse --short HEAD);
-            export commit_message=$(git -P show -s --format=%s ${short_sha});
-            if [ -z "$slack_message" ]; then
-                export slack_message="*${SLACK_PROJECT_NAME}* was deployed to *${slack_environment}* at commit \`${short_sha} ${commit_message}\`";
-            fi
-            curl -X POST --data-urlencode "payload={\"channel\": \"#fr-deploy\", \"username\": \"github-actions\", \"text\": \"${slack_message}\"}" ${SLACK_HOOK_URL}
-
   us1:
     runs-on: ubuntu-22.04
     needs: test
@@ -159,13 +137,3 @@ jobs:
       -   name: 'Run deployment to testrabbit-us1-u'
           run: |
             git push --force testrabbit-us1-u@deploy.us1.frbit.com:testrabbit-us1-u.git HEAD:master
-
-      -   name: 'Send Slack message'
-          run: |
-            echo "slack_environment=US1" >> $GITHUB_ENV
-            export short_sha=$(git rev-parse --short HEAD);
-            export commit_message=$(git -P show -s --format=%s ${short_sha});
-            if [ -z "$slack_message" ]; then
-                export slack_message="*${SLACK_PROJECT_NAME}* was deployed to *${slack_environment}* at commit \`${short_sha} ${commit_message}\`";
-            fi
-            curl -X POST --data-urlencode "payload={\"channel\": \"#fr-deploy\", \"username\": \"github-actions\", \"text\": \"${slack_message}\"}" ${SLACK_HOOK_URL}

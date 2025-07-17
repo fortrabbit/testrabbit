@@ -64,6 +64,7 @@ class Extension implements Test
         $removed_in = [
             '7.4.0' => ['wddx'],
             '8.1.0' => ['geoip'],
+            '8.4.0' => ['imap'],
         ];
 
         $expected = [

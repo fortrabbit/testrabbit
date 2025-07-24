@@ -3,6 +3,7 @@
 /public/hot
 /public/storage
 /public/imagick/tmp/
+/public/gd/tmp
 
 /storage/*.key
 /vendor
@@ -19,3 +20,6 @@ yarn-error.log
 
 /.idea
 /.vscode
+
+# Ignore so install works on many different PHP versions
+/composer.lock

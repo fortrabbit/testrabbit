@@ -1,26 +1,32 @@
-# For more information: https://laravel.com/docs/sail
-version: '3'
 services:
-    php:
+    php74:
         build:
-            context: ./docker/7.4
-            dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
+            context: docker
+            dockerfile: 7.4/Dockerfile
         image: ghcr.io/fortrabbit/testrabbit:7.4
         extra_hosts:
-            - 'host.docker.internal:host-gateway'
+            - host.docker.internal:host-gateway
+            #- memcachecluster.frbit.com:memcache
         ports:
-            - '${APP_PORT:-83}:83'
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            - '8074:8000'
         volumes:
             - './:/var/www/html'
-        networks:
-            - sail
-networks:
-    sail:
-        driver: bridge
+
+    mysql:
+        image: docker.io/mysql:8.0
+        ports:
+            - "33066:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=pwd
+            - MYSQL_DATABASE=testrabbit
+        volumes:
+            - mysql-data:/var/lib/mysql
+
+    memcache:
+        image: docker.io/memcached:1.6-alpine
+        ports:
+            - "11211:11211"
+        command: memcached -m 64 -I 1m
+
+volumes:
+    mysql-data:

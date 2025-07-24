@@ -9,14 +9,9 @@ This test app is designed to work on all supported PHP versions.
 ## Local environment
 
 ```bash
-docker-compose up -d
+just start
 ```
 
-or
-
-```bash
-sail up -d
-```
 
 ## Deployment
 

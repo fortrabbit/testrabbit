@@ -14,18 +14,16 @@ build:
 
 install: build
     #!/usr/bin/env bash
+    rm composer.lock
     if [ -n "$GITHUB_ACTIONS" ]; then
-        docker-compose run --rm php74 bash -c '\
+        docker-compose run --rm php81 bash -c '\
           composer config -g github-oauth.github.com ${GITHUB_AUTH} && \
           composer install --no-interaction --prefer-dist --no-scripts --no-cache'
     else
-        docker-compose run --rm php74 composer install
+        docker-compose run --rm php81 composer install
     fi
-
-update: build
-    docker-compose run --rm php74 composer update
-
 
 
 clean:
     rm -f public/imagick/tmp/img.*
+    rm -f public/gd/tmp/img.*

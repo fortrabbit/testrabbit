@@ -1,2 +1,13 @@
+/.dockerignore
+/.github/
+/.gitattributes
+/.gitignore
+/composer.lock
+/docker-compose.yml
+/docker/Dockerfile
+/fortrabbit-post.php
+/fortrabbit-pre.php
+/fortrabbit.yml
+/Justfile
 /storage/
 /vendor/

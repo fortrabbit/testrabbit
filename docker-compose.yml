@@ -4,44 +4,48 @@ services:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '7.4'
-        image: ghcr.io/fortrabbit/testrabbit:7.4
         ports:
             - '8074:8000'
-        volumes:
-            - './:/var/www/html'
 
     php80:
         build:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.0'
-        image: ghcr.io/fortrabbit/testrabbit:8.0
         ports:
             - '8080:8000'
-        volumes:
-            - './:/var/www/html'
 
     php81:
         build:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.1'
-        image: ghcr.io/fortrabbit/testrabbit:8.1
         ports:
             - '8081:8000'
-        volumes:
-            - './:/var/www/html'
 
     php82:
         build:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.2'
-        image: ghcr.io/fortrabbit/testrabbit:8.2
         ports:
             - '8082:8000'
-        volumes:
-            - './:/var/www/html'
+
+    php83:
+        build:
+            dockerfile: docker/Dockerfile
+            args:
+                PHP_VERSION: '8.3'
+        ports:
+            - '8083:8000'
+
+    php84:
+        build:
+            dockerfile: docker/Dockerfile
+            args:
+                PHP_VERSION: '8.4'
+        ports:
+            - '8084:8000'
 
     mysql:
         image: docker.io/mysql:8.0

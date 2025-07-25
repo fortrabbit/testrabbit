@@ -41,8 +41,7 @@ ENV LOG_LEVEL=debug
 RUN /docker-scripts/setup-laravel-dirs.sh
 
 # Run composer install
-RUN rm composer.lock; \
-    composer install --no-interaction --prefer-dist --no-scripts --no-cache
+RUN composer install --no-interaction --prefer-dist --no-scripts --no-cache
 
 # Use PHP's built in web server
 EXPOSE 8000

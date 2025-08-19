@@ -12,6 +12,7 @@ build:
         docker-compose --progress=plain build
     fi
 
+# Composer install is run inside the test containers instead
 #install: build
 #    #!/usr/bin/env bash
 #    rm composer.lock

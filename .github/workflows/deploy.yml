@@ -19,44 +19,46 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        php-version: ['7.4','8.0','8.1','8.2']
+        php-version: ['7.4','8.0','8.1','8.2','8.3','8.4']
 
     steps:
       - uses: actions/checkout@v3
 
-      -   name: Login to GitHub Container Registry
-          uses: docker/login-action@v2
-          with:
-            registry: ghcr.io
-            username: ${{ github.repository_owner }}
-            password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build docker image using Github Packages as cache
         env:
           PHP_VERSION: ${{ matrix.php-version }}
         run: |
           docker pull $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} || true
-          cd docker/$PHP_VERSION
-          docker build --build-arg PHP_VERSION=${PHP_VERSION} \
+          cd docker
+          docker build \
+            --file docker/Dockerfile \
+            --build-arg PHP_VERSION=${PHP_VERSION} \
             --cache-from $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} \
             --tag $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} \
             --tag $DOCKER_REGISTRY_IMAGE:latest .
           docker push $DOCKER_REGISTRY_IMAGE:${PHP_VERSION}
 
-      - name: Cache vendor folder
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: vendor-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}
+#      - name: Cache vendor folder
+#        uses: actions/cache@v3
+#        with:
+#          path: vendor
+#          key: vendor-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}
 
-      - name: Install dependencies
-        run: |
-          docker run --rm \
-            -v $PWD:/var/www/html \
-            $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} \
-            bash -c '\
-            composer config -g github-oauth.github.com ${{ secrets.ACTIONS_TOKEN }} && \
-            composer install --no-interaction --prefer-dist --no-scripts --no-cache'
+#      - name: Install dependencies
+#        run: |
+#          docker run --rm \
+#            -v $PWD:/var/www/html \
+#            $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} \
+#            bash -c '\
+#            composer config -g github-oauth.github.com ${{ secrets.ACTIONS_TOKEN }} && \
+#            composer install --no-interaction --prefer-dist --no-scripts --no-cache'
 
 
   usx:

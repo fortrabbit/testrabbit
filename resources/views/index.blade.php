@@ -42,6 +42,27 @@
                     <div x-show="!isLoading" x-html="message" class="max-h-72 overflow-y-auto"></div>
                 </div>
             @endforeach
+
+            <div class="bg-white mb-4 p-4 rounded-lg">
+                <h2 class="text-lg font-bold mb-2">Incoming HTTP Headers</h2>
+                <div class="bg-gray-50 p-3 rounded max-h-96 overflow-y-auto">
+                    <table class="w-full text-sm font-mono">
+                        <tbody>
+                            @foreach (request()->headers->all() as $header => $values)
+                                <tr class="border-b border-gray-200">
+                                    <td class="py-2 pr-4 font-semibold text-gray-700 align-top">{{ e($header) }}</td>
+                                    <td class="py-2 text-gray-600">
+                                        @foreach ($values as $value)
+                                            <div>{{ e($value) }}</div>
+                                        @endforeach
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <h2 class="text-lg font-bold">Additional test tools</h2>
             <ul>
                 <li class="mt-2 flex">

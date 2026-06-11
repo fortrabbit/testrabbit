@@ -24,6 +24,7 @@ build:
 #        docker-compose run --rm php81 composer install
 #    fi
 
+
 test:
     #!/usr/bin/env bash
     set -e

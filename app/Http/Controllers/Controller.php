@@ -64,13 +64,28 @@ class Controller extends BaseController
     }
 
     /**
-     * Dedicated ImageMagick performance test (MR-110).
+     * Dedicated ImageMagick performance test page (MR-110).
      *
-     * Transforms a fixed set of source images to ?count= JPEG renditions each
-     * (default 4) and reports the ms/rendition figure, so the same workload can
-     * be run and compared across the old and new fortrabbit platforms.
+     * Renders instantly with no work done: shows the environment, the rendition
+     * controls and a Run button. The actual transforms are triggered on demand
+     * via perfRun() (AJAX), so the same workload can be run and compared across
+     * the old and new fortrabbit platforms without a heavy page load.
      */
     public function perf()
+    {
+        return view('imagick-perf', [
+            'count' => Renditions::clampCount($_GET['count'] ?? 4),
+            'platform' => config('fortrabbit.platform'),
+            'imagickVersion' => Imagick::getVersion()['versionString'] ?? 'unknown',
+            'limits' => $this->imagickLimits(),
+        ]);
+    }
+
+    /**
+     * Run the ImageMagick benchmark and return results (incl. rendition URLs)
+     * as JSON. Called by the perf page via AJAX.
+     */
+    public function perfRun(): JsonResponse
     {
         // Deliberate benchmark: a high count (64 → 256 renditions) can run well
         // past PHP's default 30s cap, so lift it for this endpoint.
@@ -85,16 +100,13 @@ class Controller extends BaseController
 
         $count = Renditions::clampCount($_GET['count'] ?? 4);
 
-        $runner = new ImagickPerfRunner($publicDir . '/imagick', $tempDir);
-        $results = $runner->run($count);
+        $runner = new ImagickPerfRunner(
+            $publicDir . '/imagick',
+            $tempDir,
+            rtrim($tempLocation, '/')
+        );
 
-        return view('imagick-perf', [
-            'count' => $count,
-            'results' => $results,
-            'platform' => config('fortrabbit.platform'),
-            'imagickVersion' => Imagick::getVersion()['versionString'] ?? 'unknown',
-            'limits' => $this->imagickLimits(),
-        ]);
+        return response()->json($runner->run($count));
     }
 
     /**

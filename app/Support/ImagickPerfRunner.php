@@ -30,15 +30,19 @@ class ImagickPerfRunner
 
     private string $sourceDir;
     private string $tempDir;
+    private string $tempUrl;
 
     /**
      * @param string $sourceDir Absolute path to the directory holding the source images.
      * @param string $tempDir   Absolute path to write renditions into.
+     * @param string $tempUrl   Public web path for the temp dir (e.g. "imagick/tmp"),
+     *                          used to build URLs for the generated renditions.
      */
-    public function __construct(string $sourceDir, string $tempDir)
+    public function __construct(string $sourceDir, string $tempDir, string $tempUrl = '')
     {
         $this->sourceDir = rtrim($sourceDir, '/');
         $this->tempDir = rtrim($tempDir, '/');
+        $this->tempUrl = trim($tempUrl, '/');
     }
 
     /**
@@ -96,6 +100,7 @@ class ImagickPerfRunner
             'totalMs' => 0.0,
             'msPerRendition' => 0.0,
             'error' => null,
+            'images' => [],
         ];
 
         if (! is_file($path)) {
@@ -123,6 +128,7 @@ class ImagickPerfRunner
         foreach ($widths as $width) {
             $targetWidth = min($width, $sourceWidth);
 
+            $name = uniqid('perf.', true) . '.jpeg';
             $start = microtime(true);
             try {
                 // Decode fresh per rendition, mirroring how a CMS transforms an
@@ -132,12 +138,19 @@ class ImagickPerfRunner
                 $img->setImageCompressionQuality(self::QUALITY);
                 $img->thumbnailImage($targetWidth, 0); // height 0 = preserve aspect
 
-                $out = $this->tempDir . '/' . uniqid('perf.', true) . '.jpeg';
+                $out = $this->tempDir . '/' . $name;
                 $img->writeImage($out);
                 $img->destroy();
 
-                $totalMs += (microtime(true) - $start) * 1000;
+                $ms = (microtime(true) - $start) * 1000;
+                $totalMs += $ms;
                 $base['renditions']++;
+                $base['images'][] = [
+                    'width' => $targetWidth,
+                    'url' => $this->tempUrl . '/' . $name,
+                    'bytes' => is_file($out) ? filesize($out) : 0,
+                    'ms' => $ms,
+                ];
             } catch (\Throwable $e) {
                 // One bad rendition must not abort the measurement.
                 $base['failed']++;

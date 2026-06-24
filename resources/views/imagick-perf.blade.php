@@ -76,7 +76,7 @@
                         <span x-text="results.totals.renditions"></span> renditions
                         <span x-show="results.totals.failed > 0" class="text-red-600">
                             (<span x-text="results.totals.failed"></span> failed)</span>
-                        in <span x-text="fmt(results.totals.totalMs, 1)"></span> ms total
+                        in <span class="font-bold"><span x-text="fmt(results.totals.totalMs, 1)"></span> ms total</span>
                         · widths <span x-text="results.widths.join(', ')"></span> px
                     </div>
                 </div>

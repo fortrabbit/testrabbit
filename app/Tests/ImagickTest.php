@@ -20,6 +20,8 @@ class ImagickTest implements Test
                 'RESOURCETYPE_FILE' => Imagick::getResourceLimit(Imagick::RESOURCETYPE_FILE),
             ];
 
+            $message .= '<a href="/imagick-perf" class="border-dotted hover:border-solid border-b border-gray-600">Run the dedicated ImageMagick performance test &rarr;</a>';
+
             $message .=  '<pre>';
             $message .= print_r($limits, true);
             //$message .= print_r(Imagick::queryFormats());

@@ -69,10 +69,6 @@
                     <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="info.php" target="_blank">PHP info</a>
                     <x-link></x-link>
                 </li>
-                <li class="mt-2 flex">
-                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/imagick-perf">ImageMagick performance test</a>
-                    <x-link></x-link>
-                </li>
             </ul>
             <h3 class="text-lg font-bold mt-4 mb-2">Test Workers</h3>
             <ol class="list-decimal ml-5">

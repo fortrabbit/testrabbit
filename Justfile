@@ -41,5 +41,5 @@ test:
     echo "All tests passed!"
 
 clean:
-    rm -f public/imagick/tmp/img.*
+    rm -f public/imagick/tmp/img.* public/imagick/tmp/perf.*
     rm -f public/gd/tmp/img.*

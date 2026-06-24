@@ -72,6 +72,10 @@ class Controller extends BaseController
      */
     public function perf()
     {
+        // Deliberate benchmark: a high count (64 → 256 renditions) can run well
+        // past PHP's default 30s cap, so lift it for this endpoint.
+        set_time_limit(0);
+
         $publicDir = __DIR__ . '/../../../public';
         $tempLocation = config('imagick.tempLocation');
         $tempDir = $publicDir . '/' . $tempLocation;

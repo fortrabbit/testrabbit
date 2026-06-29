@@ -18,4 +18,4 @@ https://github.com/fortrabbit/knowledge-base/blob/main/Old%20platform/Overview/t
 
 ### Initial setup for a new App
 
-The app expects an environment variable: `APP_TYPE`. Possible values are `uni` or `pro`. Test.
+The app expects an environment variable: `APP_TYPE`. Possible values are `uni` or `pro`.

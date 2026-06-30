@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-PHP_VERSION=${1:-"8.2"}
+PHP_VERSION=${1:-"8.3"}
 echo "Installing PHP ${PHP_VERSION}..."
 
 add-apt-repository -y ppa:ondrej/php

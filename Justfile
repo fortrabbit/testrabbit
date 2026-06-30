@@ -17,18 +17,18 @@ build:
 #    #!/usr/bin/env bash
 #    rm composer.lock
 #    if [ -n "$GITHUB_ACTIONS" ]; then
-#        docker-compose run --rm php81 bash -c '\
+#        docker-compose run --rm php83 bash -c '\
 #          composer config -g github-oauth.github.com ${GITHUB_AUTH} && \
 #          composer install --no-interaction --prefer-dist --no-scripts --no-cache'
 #    else
-#        docker-compose run --rm php81 composer install
+#        docker-compose run --rm php83 composer install
 #    fi
 
 
 test:
     #!/usr/bin/env bash
     set -e
-    for port in 8074 8080 8081 8082 8083 8084; do
+    for port in 8083 8084 8085; do
         echo "--- Testing on port $port ---"
         response=$(curl -fsSL "http://localhost:$port/tests/MySQL")
 

@@ -43,6 +43,11 @@ RUN /docker-scripts/setup-laravel-dirs.sh
 # Run composer install
 RUN composer install --no-interaction --prefer-dist --no-scripts --no-cache
 
-# Use PHP's built in web server
+# Use PHP's built in web server. It is single-threaded by default, so one slow
+# request (e.g. a faithful 504 that sleeps) would block the whole server and
+# freeze the site. PHP_CLI_SERVER_WORKERS spawns multiple worker processes so
+# concurrent requests — like a series of 503/504 error tests — are handled in
+# parallel, closer to the FPM setup on the real platform.
+ENV PHP_CLI_SERVER_WORKERS=5
 EXPOSE 8000
 CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

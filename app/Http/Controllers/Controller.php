@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Support\ImagickPerfRunner;
+use App\Support\PhpErrorEmitter;
 use App\Support\Renditions;
 use App\Tests\Test;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
 use Imagick;
@@ -107,6 +109,51 @@ class Controller extends BaseController
         );
 
         return response()->json($runner->run($count));
+    }
+
+    /**
+     * PHP errors test page (FR-6108).
+     *
+     * Renders instantly. Query params prefill the controls and trigger an
+     * automatic run; with no params the page is idle until a button is clicked.
+     */
+    public function phpErrors(Request $request)
+    {
+        return view('php-errors', [
+            'type' => $request->query('errors'),
+            'count' => $request->query('count'),
+            'concurrency' => $request->query('concurrency'),
+            'sleep' => $request->query('sleep'),
+            'abort' => $request->query('abort'),
+        ]);
+    }
+
+    /**
+     * Produce exactly one PHP/HTTP error and return. Called repeatedly by the
+     * php-errors page via AJAX.
+     *
+     * 500/503/504 throw or abort (the HTTP status IS the result); warning/info
+     * log a line and return 200 JSON so the page can show "logged".
+     */
+    public function emit(Request $request): JsonResponse
+    {
+        $type = (string) $request->query('type', 'random');
+
+        if (! PhpErrorEmitter::isValidType($type)) {
+            abort(400, 'Unknown error type: ' . $type);
+        }
+
+        $abort = filter_var($request->query('abort', false), FILTER_VALIDATE_BOOLEAN);
+        $sleep = PhpErrorEmitter::clampSleep($request->query('sleep', PhpErrorEmitter::SLEEP_DEFAULT));
+        $resolved = PhpErrorEmitter::resolveType($type);
+
+        (new PhpErrorEmitter)->emit($resolved, $abort, $sleep);
+
+        // Only warning/info fall through to here (HTTP 200).
+        return response()->json([
+            'type' => $resolved,
+            'status' => 'logged',
+        ]);
     }
 
     /**

@@ -4,7 +4,7 @@
 
 FROM --platform=linux/amd64 ubuntu:24.04
 
-ARG PHP_VERSION=8.2
+ARG PHP_VERSION=8.3
 
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

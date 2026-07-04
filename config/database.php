@@ -64,7 +64,7 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 // Pdo\Mysql exists only on PHP 8.4+; PDO::MYSQL_ATTR_SSL_CA is
                 // deprecated on 8.5. Pick per version so we stay clean across
-                // PHP versions.
+                // the whole 8.3–8.5 test matrix.
                 (PHP_VERSION_ID >= 80400 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],

@@ -4,10 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TestRabbit</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Nunito', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         [x-cloak] {
             display: none !important;
@@ -25,7 +24,8 @@
                     x-data="{success: false, pass: false, message: '', isLoading: true}"
                     x-init="fetch('/tests/<?= $this->e($test) ?>')
                     .then(response => response.json())
-                    .then(response => { isLoading = false; pass = response.pass; success = response.success; message = response.message; })"
+                    .then(response => { isLoading = false; pass = response.pass; success = response.success; message = response.message; })
+                    .catch(e => { isLoading = false; success = false; pass = false; message = 'Request failed: ' + e; })"
                     class="bg-white mb-4 p-4 rounded-lg"
                 >
                     <div class="flex justify-between mb-2">

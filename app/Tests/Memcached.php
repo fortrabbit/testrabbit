@@ -11,7 +11,7 @@ class Memcached implements Test
         $memcachedClass = '\Memcached';
         if (class_exists($memcachedClass)) {
             $mc = new $memcachedClass;
-            foreach (['memcachecluster.frbit.com'] as $e) {
+            foreach ([env('MEMCACHED_HOST', 'memcachecluster.frbit.com')] as $e) {
                 try {
                     $port = 11211;
                     $host = $e;

@@ -31,6 +31,7 @@ COPY docker/ /docker-scripts/
 RUN chmod +x /docker-scripts/*.sh
 RUN /docker-scripts/install-php.sh $PHP_VERSION
 RUN /docker-scripts/install-pecl.sh $PHP_VERSION
+RUN /docker-scripts/install-vendor-extensions.sh $PHP_VERSION
 
 # Copy source code
 WORKDIR /var/www/html

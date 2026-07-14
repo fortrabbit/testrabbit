@@ -45,26 +45,42 @@ class Controller
     {
         $class = '\App\Tests\\' . $testName;
         if (! class_exists($class)) {
-            throw new \Exception('Class ' . $testName . ' not found');
-        }
-        /** @var Test $test */
-        $test = new $class;
-
-        if (config('app.type') === 'uni' && $test->appType() !== 'uni') {
             return Response::json([
                 'success' => false,
-                'pass' => true,
-                'message' => 'Pro test: I will not run this on a uni app!',
+                'pass' => false,
+                'message' => 'Class ' . $testName . ' not found',
             ]);
         }
 
-        $result = $test->execute();
+        try {
+            /** @var Test $test */
+            $test = new $class;
 
-        return Response::json([
-            'success' => $result->isSuccessful(),
-            'pass' => false,
-            'message' => $result->getMessage(),
-        ]);
+            if (config('app.type') === 'uni' && $test->appType() !== 'uni') {
+                return Response::json([
+                    'success' => false,
+                    'pass' => true,
+                    'message' => 'Pro test: I will not run this on a uni app!',
+                ]);
+            }
+
+            $result = $test->execute();
+
+            return Response::json([
+                'success' => $result->isSuccessful(),
+                'pass' => false,
+                'message' => $result->getMessage(),
+            ]);
+        } catch (\Throwable $e) {
+            // A test that fatals (e.g. a missing extension like Imagick) must
+            // still return the JSON contract so the card shows a failure rather
+            // than the homepage spinner hanging on a 500.
+            return Response::json([
+                'success' => false,
+                'pass' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

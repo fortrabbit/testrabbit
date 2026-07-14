@@ -1,9 +1,24 @@
+x-app-env: &app-env
+    APP_TYPE: pro
+    # This local apt ImageMagick has no HEIC codec, so use the conservative
+    # format set (jpeg/png/webp). Production ubuntu22/24/k8s images ship
+    # ImageMagick with libheif/avif and use their own FRBIT_PLATFORM value.
+    FRBIT_PLATFORM: ubuntu18
+    DB_HOST: mysql
+    DB_PORT: '3306'
+    DB_DATABASE: testrabbit
+    DB_USERNAME: root
+    DB_PASSWORD: pwd
+    MEMCACHED_HOST: memcache
+    MONGODB_CONNECTION: 'mongodb://mongo:27017'
+
 services:
     php74:
         build:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '7.4'
+        environment: *app-env
         ports:
             - '8074:8000'
 
@@ -12,6 +27,7 @@ services:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.0'
+        environment: *app-env
         ports:
             - '8080:8000'
 
@@ -20,6 +36,7 @@ services:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.1'
+        environment: *app-env
         ports:
             - '8081:8000'
 
@@ -28,6 +45,7 @@ services:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.2'
+        environment: *app-env
         ports:
             - '8082:8000'
 
@@ -36,6 +54,7 @@ services:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.3'
+        environment: *app-env
         ports:
             - '8083:8000'
 
@@ -44,6 +63,7 @@ services:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.4'
+        environment: *app-env
         ports:
             - '8084:8000'
 
@@ -52,6 +72,7 @@ services:
             dockerfile: docker/Dockerfile
             args:
                 PHP_VERSION: '8.5'
+        environment: *app-env
         ports:
             - '8085:8000'
 
@@ -70,6 +91,11 @@ services:
         ports:
             - "11211:11211"
         command: memcached -m 64 -I 1m
+
+    mongo:
+        image: docker.io/mongo:7
+        ports:
+            - "27017:27017"
 
 volumes:
     mysql-data:

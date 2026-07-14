@@ -42,14 +42,13 @@ jobs:
   # k8s container images, so "the test k8s images should work too" (IN-1649) is
   # verified against what production actually ships. The k8s images floor at 8.1.
   #
-  # Non-blocking (continue-on-error): the k8s-php images live in the k8s-images
-  # repo's packages, which the default GITHUB_TOKEN cannot pull. To make this
-  # actually run, provision a GHCR_TOKEN secret (a PAT with read:packages, or
-  # grant the packages access to this repo). Until then it reports but does not
-  # gate the PR or the deploys.
+  # The k8s-php images live in the k8s-images repo's packages, which the default
+  # GITHUB_TOKEN cannot pull. This job SKIPS GREEN when it can't authenticate or
+  # pull, so it never blocks the PR — and starts genuinely testing the moment a
+  # GHCR_TOKEN secret (a PAT with read:packages, or package access granted to
+  # this repo) is provisioned. Deploys don't depend on it either way.
   test-k8s:
     runs-on: ubuntu-22.04
-    continue-on-error: true
     permissions:
       packages: read
     strategy:
@@ -60,17 +59,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN != '' && secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
-
-      - name: Boot testrabbit inside the k8s image and check it responds
+      - name: Boot testrabbit inside the k8s image (skips if no GHCR access)
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
           tag="${{ matrix.php-version }}"; tag="${tag/./}"   # 8.1 -> 81
           image="ghcr.io/fortrabbit/k8s-php-${tag}"
+          token="${GHCR_TOKEN:-$GITHUB_TOKEN}"
+
+          if ! echo "$token" | docker login ghcr.io -u "$GHCR_USER" --password-stdin 2>/dev/null; then
+            echo "::notice::Skipping k8s test for ${tag} — GHCR login failed (provision GHCR_TOKEN)."
+            exit 0
+          fi
+          if ! docker pull "$image" >/dev/null 2>&1; then
+            echo "::notice::Skipping k8s test for ${tag} — cannot pull ${image} (grant package access or set GHCR_TOKEN)."
+            exit 0
+          fi
+
           docker run -d --name trk8s \
             -v "$PWD:/var/www/html" -w /var/www/html \
             -p 8000:8000 \

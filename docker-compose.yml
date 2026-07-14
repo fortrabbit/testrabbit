@@ -1,4 +1,36 @@
 services:
+    php74:
+        build:
+            dockerfile: docker/Dockerfile
+            args:
+                PHP_VERSION: '7.4'
+        ports:
+            - '8074:8000'
+
+    php80:
+        build:
+            dockerfile: docker/Dockerfile
+            args:
+                PHP_VERSION: '8.0'
+        ports:
+            - '8080:8000'
+
+    php81:
+        build:
+            dockerfile: docker/Dockerfile
+            args:
+                PHP_VERSION: '8.1'
+        ports:
+            - '8081:8000'
+
+    php82:
+        build:
+            dockerfile: docker/Dockerfile
+            args:
+                PHP_VERSION: '8.2'
+        ports:
+            - '8082:8000'
+
     php83:
         build:
             dockerfile: docker/Dockerfile

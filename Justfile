@@ -12,23 +12,13 @@ build:
         docker-compose --progress=plain build
     fi
 
-# Composer install is run inside the test containers instead
-#install: build
-#    #!/usr/bin/env bash
-#    rm composer.lock
-#    if [ -n "$GITHUB_ACTIONS" ]; then
-#        docker-compose run --rm php83 bash -c '\
-#          composer config -g github-oauth.github.com ${GITHUB_AUTH} && \
-#          composer install --no-interaction --prefer-dist --no-scripts --no-cache'
-#    else
-#        docker-compose run --rm php83 composer install
-#    fi
-
-
+# Smoke test: hit the MySQL feature test on every PHP version and assert success.
+# testrabbit is a zero-dependency plain-PHP app (IN-1649) — no composer install
+# step, so the containers just serve the source directly on 7.4 → 8.5.
 test:
     #!/usr/bin/env bash
     set -e
-    for port in 8083 8084 8085; do
+    for port in 8074 8080 8081 8082 8083 8084 8085; do
         echo "--- Testing on port $port ---"
         response=$(curl -fsSL "http://localhost:$port/tests/MySQL")
 

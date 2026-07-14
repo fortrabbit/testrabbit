@@ -9,23 +9,20 @@ on:
 
 jobs:
 
+  # Old-platform coverage: build the local Ubuntu image and boot the app on
+  # every PHP version the old platform serves, down to 7.4. Zero-dependency
+  # plain PHP (IN-1649), so there is no composer install to break per version.
   test:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
-        php-version: ['8.3','8.4','8.5']
+        php-version: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
 
     steps:
       - uses: actions/checkout@v3
 
-#      - name: Login to GitHub Container Registry
-#        uses: docker/login-action@v2
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.repository_owner }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build docker image using Github Packages as cache
+      - name: Build image
         env:
           PHP_VERSION: ${{ matrix.php-version }}
         run: |
@@ -35,25 +32,48 @@ jobs:
             --tag $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} \
             .
 
-#      - name: Cache vendor folder
-#        uses: actions/cache@v3
-#        with:
-#          path: vendor
-#          key: vendor-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}
+      - name: Boot the app and check it responds
+        run: |
+          docker run -d --name tr -p 8000:8000 $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }}
+          ./scripts/smoke.sh http://localhost:8000
+          docker rm -f tr
 
-#      - name: Install dependencies
-#        run: |
-#          docker run --rm \
-#            -v $PWD:/var/www/html \
-#            $DOCKER_REGISTRY_IMAGE:${{ matrix.php-version }} \
-#            bash -c '\
-#            composer config -g github-oauth.github.com ${{ secrets.ACTIONS_TOKEN }} && \
-#            composer install --no-interaction --prefer-dist --no-scripts --no-cache'
+  # New-platform coverage: run the exact same suite INSIDE the platform's own
+  # k8s container images, so "the test k8s images should work too" (IN-1649) is
+  # verified against what production actually ships. The k8s images floor at 8.1.
+  test-k8s:
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3', '8.4', '8.5']
 
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Boot testrabbit inside the k8s image and check it responds
+        run: |
+          tag="${{ matrix.php-version }}"; tag="${tag/./}"   # 8.1 -> 81
+          image="ghcr.io/fortrabbit/k8s-php-${tag}"
+          docker run -d --name trk8s \
+            -v "$PWD:/var/www/html" -w /var/www/html \
+            -p 8000:8000 \
+            --entrypoint php "$image" -S 0.0.0.0:8000 -t public
+          ./scripts/smoke.sh http://localhost:8000
+          docker rm -f trk8s
 
   usx:
     runs-on: ubuntu-22.04
-    needs: test
+    needs: [test, test-k8s]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     steps:
       -   name: Checkout
@@ -80,7 +100,7 @@ jobs:
 
   eu2:
     runs-on: ubuntu-22.04
-    needs: test
+    needs: [test, test-k8s]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     steps:
       -   name: Checkout
@@ -108,7 +128,7 @@ jobs:
 
   us1:
     runs-on: ubuntu-22.04
-    needs: test
+    needs: [test, test-k8s]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     steps:
       -   name: Checkout

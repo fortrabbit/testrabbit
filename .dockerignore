@@ -2,12 +2,8 @@
 /.github/
 /.gitattributes
 /.gitignore
-/composer.lock
+/.env
 /docker-compose.yml
 /docker/Dockerfile
-/fortrabbit-post.php
-/fortrabbit-pre.php
 /fortrabbit.yml
 /Justfile
-/storage/
-/vendor/

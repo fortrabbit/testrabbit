@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Framework\Request;
+use App\Framework\Response;
 use App\Support\ImagickPerfRunner;
 use App\Support\PhpErrorEmitter;
 use App\Support\Renditions;
 use App\Tests\Test;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Log;
 use Imagick;
 
-class Controller extends BaseController
+/**
+ * Front-controller request handlers. Plain PHP — no framework base class.
+ */
+class Controller
 {
-    public function index()
+    public function index(): Response
     {
-        // Stupid log entry to check if log tailing works
-        Log::info('We have visitors!');
+        // Stupid log entry to check if log tailing works.
+        error_log('We have visitors!');
 
         $this->deleteTempImages();
 
@@ -34,35 +35,52 @@ class Controller extends BaseController
             'Domain Redirect' => 'DomainRedirect',
         ];
 
-        return view('index', [
+        return Response::html(view('index', [
             'tests' => $tests,
-        ]);
+            'headers' => Request::headers(),
+        ]));
     }
 
-    public function test(string $testName): JsonResponse
+    public function test(string $testName): Response
     {
         $class = '\App\Tests\\' . $testName;
         if (! class_exists($class)) {
-            throw new \Exception('Class ' . $testName . ' not found');
-        }
-        /** @var Test $test */
-        $test = new $class;
-
-        if (config('app.type') === 'uni' && $test->appType() !== 'uni') {
-            return response()->json([
+            return Response::json([
                 'success' => false,
-                'pass' => true,
-                'message' => 'Pro test: I will not run this on a uni app!'
+                'pass' => false,
+                'message' => 'Class ' . $testName . ' not found',
             ]);
         }
 
-        $result = $test->execute();
+        try {
+            /** @var Test $test */
+            $test = new $class;
 
-        return response()->json([
-            'success' => $result->isSuccessful(),
-            'pass' => false,
-            'message' => $result->getMessage(),
-        ]);
+            if (config('app.type') === 'uni' && $test->appType() !== 'uni') {
+                return Response::json([
+                    'success' => false,
+                    'pass' => true,
+                    'message' => 'Pro test: I will not run this on a uni app!',
+                ]);
+            }
+
+            $result = $test->execute();
+
+            return Response::json([
+                'success' => $result->isSuccessful(),
+                'pass' => false,
+                'message' => $result->getMessage(),
+            ]);
+        } catch (\Throwable $e) {
+            // A test that fatals (e.g. a missing extension like Imagick) must
+            // still return the JSON contract so the card shows a failure rather
+            // than the homepage spinner hanging on a 500.
+            return Response::json([
+                'success' => false,
+                'pass' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -73,21 +91,21 @@ class Controller extends BaseController
      * via perfRun() (AJAX), so the same workload can be run and compared across
      * the old and new fortrabbit platforms without a heavy page load.
      */
-    public function perf()
+    public function perf(): Response
     {
-        return view('imagick-perf', [
-            'count' => Renditions::clampCount($_GET['count'] ?? 4),
+        return Response::html(view('imagick-perf', [
+            'count' => Renditions::clampCount(Request::query('count', 4)),
             'platform' => config('fortrabbit.platform'),
             'imagickVersion' => Imagick::getVersion()['versionString'] ?? 'unknown',
             'limits' => $this->imagickLimits(),
-        ]);
+        ]));
     }
 
     /**
      * Run the ImageMagick benchmark and return results (incl. rendition URLs)
      * as JSON. Called by the perf page via AJAX.
      */
-    public function perfRun(): JsonResponse
+    public function perfRun(): Response
     {
         // Deliberate benchmark: a high count (64 → 256 renditions) can run well
         // past PHP's default 30s cap, so lift it for this endpoint.
@@ -100,7 +118,7 @@ class Controller extends BaseController
         // Clear prior renditions so a run reflects only its own work.
         $this->clearDirectory($tempDir);
 
-        $count = Renditions::clampCount($_GET['count'] ?? 4);
+        $count = Renditions::clampCount(Request::query('count', 4));
 
         $runner = new ImagickPerfRunner(
             $publicDir . '/imagick',
@@ -108,7 +126,7 @@ class Controller extends BaseController
             rtrim($tempLocation, '/')
         );
 
-        return response()->json($runner->run($count));
+        return Response::json($runner->run($count));
     }
 
     /**
@@ -117,15 +135,15 @@ class Controller extends BaseController
      * Renders instantly. Query params prefill the controls and trigger an
      * automatic run; with no params the page is idle until a button is clicked.
      */
-    public function phpErrors(Request $request)
+    public function phpErrors(): Response
     {
-        return view('php-errors', [
-            'type' => $request->query('errors'),
-            'count' => $request->query('count'),
-            'concurrency' => $request->query('concurrency'),
-            'sleep' => $request->query('sleep'),
-            'abort' => $request->query('abort'),
-        ]);
+        return Response::html(view('php-errors', [
+            'type' => Request::query('errors'),
+            'count' => Request::query('count'),
+            'concurrency' => Request::query('concurrency'),
+            'sleep' => Request::query('sleep'),
+            'abort' => Request::query('abort'),
+        ]));
     }
 
     /**
@@ -135,22 +153,22 @@ class Controller extends BaseController
      * 500/503/504 throw or abort (the HTTP status IS the result); warning/info
      * log a line and return 200 JSON so the page can show "logged".
      */
-    public function emit(Request $request): JsonResponse
+    public function emit(): Response
     {
-        $type = (string) $request->query('type', 'random');
+        $type = (string) Request::query('type', 'random');
 
         if (! PhpErrorEmitter::isValidType($type)) {
             abort(400, 'Unknown error type: ' . $type);
         }
 
-        $abort = filter_var($request->query('abort', false), FILTER_VALIDATE_BOOLEAN);
-        $sleep = PhpErrorEmitter::clampSleep($request->query('sleep', PhpErrorEmitter::SLEEP_DEFAULT));
+        $abort = filter_var(Request::query('abort', false), FILTER_VALIDATE_BOOLEAN);
+        $sleep = PhpErrorEmitter::clampSleep(Request::query('sleep', PhpErrorEmitter::SLEEP_DEFAULT));
         $resolved = PhpErrorEmitter::resolveType($type);
 
         (new PhpErrorEmitter)->emit($resolved, $abort, $sleep);
 
         // Only warning/info fall through to here (HTTP 200).
-        return response()->json([
+        return Response::json([
             'type' => $resolved,
             'status' => 'logged',
         ]);
@@ -174,7 +192,7 @@ class Controller extends BaseController
     {
         $locations = [
             __DIR__ . '/../../../public/' . config('imagick.tempLocation'),
-            __DIR__ . '/../../../public/' . config('gd.tempLocation')
+            __DIR__ . '/../../../public/' . config('gd.tempLocation'),
         ];
 
         foreach ($locations as $location) {

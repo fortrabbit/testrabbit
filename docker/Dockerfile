@@ -23,25 +23,25 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install PHP with extensions and tools
+# Install PHP with extensions and tools.
+# No Composer: testrabbit is a zero-dependency plain-PHP app (IN-1649), so there
+# is nothing to install and the "composer install fails on old PHP" failure mode
+# no longer exists — which is exactly why this runs unchanged on 7.4 → 8.5.
 COPY docker/ /docker-scripts/
 RUN chmod +x /docker-scripts/*.sh
 RUN /docker-scripts/install-php.sh $PHP_VERSION
 RUN /docker-scripts/install-pecl.sh $PHP_VERSION
-RUN /docker-scripts/install-composer.sh
+RUN /docker-scripts/install-vendor-extensions.sh $PHP_VERSION
 
 # Copy source code
 WORKDIR /var/www/html
 COPY ./ /var/www/html/
 
-# Configure for Laravel
-RUN cp /docker-scripts/php-laravel.ini /etc/php/$PHP_VERSION/cli/conf.d/99-laravel.ini
-ENV LOG_CHANNEL=stderr
-ENV LOG_LEVEL=debug
-RUN /docker-scripts/setup-laravel-dirs.sh
+# PHP config (log to stderr, don't render errors into responses).
+RUN cp /docker-scripts/php.ini /etc/php/$PHP_VERSION/cli/conf.d/99-testrabbit.ini
 
-# Run composer install
-RUN composer install --no-interaction --prefer-dist --no-scripts --no-cache
+# Writable temp dirs for GD/Imagick renditions.
+RUN mkdir -p public/imagick/tmp public/gd/tmp && chmod -R 0777 public/imagick/tmp public/gd/tmp
 
 # Use PHP's built in web server. It is single-threaded by default, so one slow
 # request (e.g. a faithful 504 that sleeps) would block the whole server and

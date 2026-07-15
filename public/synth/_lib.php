@@ -130,7 +130,7 @@ function synth_connect(array $config, string $host, bool $verifyServerCert = tru
     return new PDO($dsn, $config['user'], $config['password'], synth_pdo_options($verifyServerCert));
 }
 
-/** min/median/avg/p95/max over millisecond samples. */
+/** min/median/avg/p95/max over millisecond samples (4 decimals = 0.1 µs). */
 function synth_stats(array $ms): array
 {
     sort($ms);
@@ -138,12 +138,70 @@ function synth_stats(array $ms): array
 
     return [
         'n' => $n,
-        'min' => round($ms[0], 3),
-        'med' => round($ms[intdiv($n, 2)], 3),
-        'avg' => round(array_sum($ms) / $n, 3),
-        'p95' => round($ms[min($n - 1, (int) ceil($n * 0.95) - 1)], 3),
-        'max' => round($ms[$n - 1], 3),
+        'min' => round($ms[0], 4),
+        'med' => round($ms[intdiv($n, 2)], 4),
+        'avg' => round(array_sum($ms) / $n, 4),
+        'p95' => round($ms[min($n - 1, (int) ceil($n * 0.95) - 1)], 4),
+        'max' => round($ms[$n - 1], 4),
     ];
+}
+
+/**
+ * Collect up to $max regular-file paths under $base (optionally only files
+ * ≤ $maxBytes). The walk itself is metadata work — callers time it.
+ *
+ * @return list<string>
+ */
+function synth_collect_files(string $base, int $max, ?int $maxBytes = null): array
+{
+    $paths = [];
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($base, FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($iterator as $file) {
+        if (!$file->isFile() || ($maxBytes !== null && $file->getSize() > $maxBytes)) {
+            continue;
+        }
+        $paths[] = $file->getPathname();
+        if (count($paths) >= $max) {
+            break;
+        }
+    }
+
+    return $paths;
+}
+
+/**
+ * Deterministic synthetic tree on node-local memory/disk (tmpfs if possible) —
+ * the in-pod baseline that isolates FS cost (CephFS/btrfs) from PHP overhead.
+ * Reused if it already exists.
+ *
+ * @return array{base: string, files: list<string>}|null
+ */
+function synth_local_tree(int $files = 200, int $bytes = 256): ?array
+{
+    foreach (['/dev/shm', sys_get_temp_dir()] as $root) {
+        if (!is_dir($root) || !is_writable($root)) {
+            continue;
+        }
+        $base = $root.'/synth-fs';
+        $paths = [];
+        for ($i = 0; $i < $files; $i++) {
+            $dir = sprintf('%s/d%02d', $base, $i % 20);
+            $path = sprintf('%s/f%03d.txt', $dir, $i);
+            if (!is_file($path)) {
+                if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir)) {
+                    continue 2;
+                }
+                file_put_contents($path, substr(str_repeat(md5((string) $i), intdiv($bytes, 32) + 1), 0, $bytes));
+            }
+            $paths[] = $path;
+        }
+
+        return ['base' => $base, 'files' => $paths];
+    }
+
+    return null;
 }
 
 /** Clamped integer query parameter. */

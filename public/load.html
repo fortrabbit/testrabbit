@@ -1,0 +1,28 @@
+<!doctype html><meta charset=utf8><title>load — PHP scaling probe</title>
+<style>body{font:14px system-ui;margin:2rem;max-width:40rem}button{margin:.2rem}pre{background:#f4f4f4;padding:1rem;overflow:auto}</style>
+<h1>PHP plan scaling — load probe</h1>
+<div id=btns></div>
+<p>elapsed: <b id=timer>—</b></p>
+<pre id=out>click a preset…</pre>
+<script>
+const presets = {
+  'info': '/load.php?info=1',
+  'wait 200ms': '/load.php?wait=200',
+  'burn 100ms': '/load.php?burn=100',
+  'mb 128 (may OOM)': '/load.php?mb=128',
+  'mb 512 (likely OOM)': '/load.php?mb=512',
+  'sql 1000 rows': '/load-sql.php?rows=1000',
+};
+const b = document.getElementById('btns'), out = document.getElementById('out'), timer = document.getElementById('timer');
+for (const [label, path] of Object.entries(presets)) {
+  const btn = document.createElement('button'); btn.textContent = label;
+  btn.onclick = async () => {
+    out.textContent = '…'; timer.textContent = '…';
+    const t0 = performance.now();
+    try { const r = await fetch(path); out.textContent = r.status + '\n' + await r.text(); }
+    catch (e) { out.textContent = 'ERROR ' + e; }
+    timer.textContent = Math.round(performance.now() - t0) + ' ms';
+  };
+  b.appendChild(btn);
+}
+</script>

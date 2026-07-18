@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors', '0');
 // load.php — synthetic PHP-plan-scaling instrument. Zero deps, ZERO DB coupling.
 // Knobs: ?wait=<ms> (I/O wait), ?burn=<ms> (CPU), ?mb=<N> (hold N MB), ?info=1 (probe).
 // See KB: "PHP plan scaling — test design".
@@ -30,6 +31,16 @@ if (isset($_GET['info'])) {
 
 // Memory: hold ~mb MB of DISTINCT bytes so it is real resident memory
 // (random_bytes defeats copy-on-write and string interning). May OOM -> HTTP 500.
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        if (!headers_sent()) {
+            http_response_code(500);
+            header('Content-Type: application/json');
+        }
+        echo json_encode(['error' => 'fatal', 'type' => $e['type']]);
+    }
+});
 $hold = [];
 for ($i = 0; $i < $mb; $i++) {
     $hold[] = random_bytes(1024 * 1024);

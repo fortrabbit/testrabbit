@@ -1,28 +1,149 @@
-<!doctype html><meta charset=utf8><title>load — PHP scaling probe</title>
-<style>body{font:14px system-ui;margin:2rem;max-width:40rem}button{margin:.2rem}pre{background:#f4f4f4;padding:1rem;overflow:auto}</style>
-<h1>PHP plan scaling — load probe</h1>
-<div id=btns></div>
-<p>elapsed: <b id=timer>—</b></p>
-<pre id=out>click a preset…</pre>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>load — PHP scaling probe</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>body{font-family:'Nunito',sans-serif}</style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+<div class="max-w-4xl mx-auto p-4 sm:p-8">
+
+  <div class="flex items-baseline justify-between mb-1">
+    <h1 class="text-2xl font-bold">PHP plan scaling — load probe</h1>
+    <a href="/" class="text-sm border-dotted hover:border-solid border-b border-gray-500">&larr; testrabbit home</a>
+  </div>
+  <p class="text-sm text-gray-500 mb-6">Drives <code>/load.php</code> (zero-dep, no DB) and <code>/load-sql.php</code> (DB contrast). Knobs: <code>wait</code>=I/O ms, <code>burn</code>=CPU ms, <code>mb</code>=hold N MB. Host: <span id="host" class="font-mono">…</span></p>
+
+  <!-- Panel 1: single request -->
+  <section class="bg-white rounded-lg p-4 mb-6 shadow-sm">
+    <h2 class="text-lg font-bold mb-1">Single request</h2>
+    <p class="text-sm text-gray-500 mb-3">Fire one request and see what the server did.</p>
+    <div id="presets" class="flex flex-wrap gap-2 mb-3"></div>
+    <div id="single" class="text-sm"></div>
+  </section>
+
+  <!-- Panel 2: concurrency -->
+  <section class="bg-white rounded-lg p-4 mb-6 shadow-sm">
+    <h2 class="text-lg font-bold mb-1">Concurrency — fire N parallel requests</h2>
+    <p class="text-sm text-gray-500 mb-3">Each request just <code>wait</code>s (holds no CPU). If the plan runs <b>P</b> PHP processes, ~P finish in the first wave (≈ the wait time); the rest queue into later waves. That wave-1 count ≈ the plan's concurrency.</p>
+    <div class="flex flex-wrap items-end gap-3 mb-3">
+      <label class="text-sm">parallel requests (N)
+        <input id="cN" type="number" value="10" min="1" max="200" class="mt-1 block w-24 border rounded px-2 py-1 font-mono">
+      </label>
+      <label class="text-sm">wait each (ms)
+        <input id="cWait" type="number" value="1000" min="100" max="10000" step="100" class="mt-1 block w-28 border rounded px-2 py-1 font-mono">
+      </label>
+      <button id="cRun" class="bg-gray-800 text-white rounded px-4 py-2 text-sm hover:bg-gray-700 disabled:opacity-50">Fire N parallel</button>
+      <span id="cSummary" class="text-sm text-gray-600"></span>
+    </div>
+    <div id="cTimeline" class="space-y-1 mb-3"></div>
+    <div id="cTable"></div>
+  </section>
+
+  <!-- Panel 3: memory ceiling -->
+  <section class="bg-white rounded-lg p-4 mb-6 shadow-sm">
+    <h2 class="text-lg font-bold mb-1">Memory ceiling (effect A)</h2>
+    <p class="text-sm text-gray-500 mb-3">Requests increasing <code>mb</code> until one exceeds <code>memory_limit</code> and returns <b>HTTP 500</b>. The highest size that still returns 200 is the ceiling — it should rise with the plan iff <code>memory_limit</code> scales.</p>
+    <div class="flex items-center gap-3 mb-3">
+      <button id="mRun" class="bg-gray-800 text-white rounded px-4 py-2 text-sm hover:bg-gray-700 disabled:opacity-50">Ramp mb until OOM</button>
+      <span id="mSummary" class="text-sm text-gray-600"></span>
+    </div>
+    <div id="mTable"></div>
+  </section>
+
+</div>
 <script>
-const presets = {
-  'info': '/load.php?info=1',
-  'wait 200ms': '/load.php?wait=200',
-  'burn 100ms': '/load.php?burn=100',
-  'mb 128 (may OOM)': '/load.php?mb=128',
-  'mb 512 (likely OOM)': '/load.php?mb=512',
-  'sql 1000 rows': '/load-sql.php?rows=1000',
-};
-const b = document.getElementById('btns'), out = document.getElementById('out'), timer = document.getElementById('timer');
-for (const [label, path] of Object.entries(presets)) {
-  const btn = document.createElement('button'); btn.textContent = label;
-  btn.onclick = async () => {
-    out.textContent = '…'; timer.textContent = '…';
-    const t0 = performance.now();
-    try { const r = await fetch(path); out.textContent = r.status + '\n' + await r.text(); }
-    catch (e) { out.textContent = 'ERROR ' + e; }
-    timer.textContent = Math.round(performance.now() - t0) + ' ms';
-  };
-  b.appendChild(btn);
+const $ = (id) => document.getElementById(id);
+const badge = (ok) => `<span class="inline-block px-2 py-0.5 rounded text-xs font-bold ${ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${ok ? '200 OK' : '500'}</span>`;
+
+function kvTable(obj) {
+  const rows = Object.entries(obj).map(([k, v]) =>
+    `<tr class="border-b border-gray-100"><td class="py-1 pr-4 font-semibold text-gray-600 align-top">${k}</td><td class="py-1 font-mono break-all">${typeof v === 'object' ? JSON.stringify(v) : v}</td></tr>`).join('');
+  return `<table class="w-full text-sm"><tbody>${rows}</tbody></table>`;
 }
+
+async function hit(path) {
+  const t0 = performance.now();
+  const r = await fetch(path);
+  const ms = Math.round(performance.now() - t0);
+  let body; try { body = await r.json(); } catch { body = { raw: await r.text() }; }
+  return { status: r.status, ok: r.ok, ms, body, peak: r.headers.get('X-Peak-MB') };
+}
+
+// ---- Panel 1: presets ----
+const PRESETS = [
+  ['info', '/load.php?info=1'],
+  ['wait 200ms', '/load.php?wait=200'],
+  ['burn 100ms', '/load.php?burn=100'],
+  ['hold 64 MB', '/load.php?mb=64'],
+  ['hold 200 MB (OOM?)', '/load.php?mb=200'],
+  ['sql 1000 rows', '/load-sql.php?rows=1000'],
+];
+PRESETS.forEach(([label, path]) => {
+  const b = document.createElement('button');
+  b.textContent = label;
+  b.className = 'border border-gray-300 rounded px-3 py-1.5 text-sm hover:bg-gray-50';
+  b.onclick = async () => {
+    $('single').innerHTML = '<span class="text-gray-400">…</span>';
+    const res = await hit(path);
+    $('single').innerHTML =
+      `<div class="mb-2 flex items-center flex-wrap gap-3">${badge(res.ok)}<span class="text-gray-500">${path}</span><span class="font-mono">${res.ms} ms</span>${res.peak ? `<span class="text-gray-500">peak ${res.peak} MB</span>` : ''}</div>` +
+      kvTable(res.body);
+    if (res.body && res.body.host) $('host').textContent = res.body.host;
+  };
+  $('presets').appendChild(b);
+});
+hit('/load.php?info=1').then(r => { if (r.body.host) $('host').textContent = r.body.host; }).catch(() => {});
+
+// ---- Panel 2: concurrency ----
+$('cRun').onclick = async () => {
+  const N = Math.max(1, +$('cN').value), wait = Math.max(1, +$('cWait').value);
+  $('cRun').disabled = true; $('cSummary').textContent = `firing ${N}…`;
+  $('cTimeline').innerHTML = ''; $('cTable').innerHTML = '';
+  const t0 = performance.now();
+  const results = await Promise.all(Array.from({ length: N }, (_, i) =>
+    hit('/load.php?wait=' + wait).then(r => ({ i: i + 1, ...r, end: performance.now() - t0 }))));
+  const wall = Math.round(performance.now() - t0);
+  const waveColors = ['bg-green-500', 'bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-rose-700'];
+  const waveOf = (end) => Math.min(waveColors.length, Math.max(1, Math.round(end / wait)));
+  const maxEnd = Math.max(...results.map(r => r.end));
+  $('cTimeline').innerHTML = results.slice().sort((a, b) => a.end - b.end).map(r => {
+    const w = Math.max(4, (r.end / maxEnd) * 100);
+    return `<div class="flex items-center gap-2 text-xs">
+      <span class="w-8 text-right text-gray-400 font-mono">#${r.i}</span>
+      <div class="flex-1 bg-gray-100 rounded"><div class="${waveColors[waveOf(r.end)-1]} h-4 rounded" style="width:${w}%"></div></div>
+      <span class="w-16 text-right font-mono">${Math.round(r.end)} ms</span></div>`;
+  }).join('');
+  const wave1 = results.filter(r => waveOf(r.end) === 1).length;
+  const waves = Math.max(...results.map(r => waveOf(r.end)));
+  const failed = results.filter(r => !r.ok).length;
+  $('cSummary').innerHTML = `wall <b>${wall} ms</b> · wave-1 ≈ <b>${wave1}</b> concurrent (est. processes) · ${waves} wave(s)${failed ? ` · <span class="text-red-600">${failed} failed</span>` : ''}`;
+  $('cTable').innerHTML = `<table class="w-full text-sm mt-2"><thead><tr class="text-left text-gray-500 border-b"><th class="py-1">#</th><th>status</th><th>server ms</th><th>finished at</th><th>wave</th></tr></thead><tbody>${
+    results.map(r => `<tr class="border-b border-gray-100"><td class="py-1 font-mono">#${r.i}</td><td>${badge(r.ok)}</td><td class="font-mono">${r.body.elapsed_ms ?? '—'}</td><td class="font-mono">${Math.round(r.end)} ms</td><td class="font-mono">${waveOf(r.end)}</td></tr>`).join('')
+  }</tbody></table>`;
+  $('cRun').disabled = false;
+};
+
+// ---- Panel 3: memory ceiling ----
+$('mRun').onclick = async () => {
+  const levels = [32, 64, 128, 256, 512, 1024, 2048];
+  $('mRun').disabled = true; $('mSummary').textContent = 'ramping…'; $('mTable').innerHTML = '';
+  const rows = [];
+  let ceiling = null;
+  for (const mb of levels) {
+    const res = await hit('/load.php?mb=' + mb);
+    rows.push({ mb, ...res });
+    if (res.ok) ceiling = mb; else break;
+  }
+  $('mSummary').innerHTML = ceiling ? `ceiling ≈ <b>${ceiling} MB</b> (highest size that still returned 200)` : 'even the smallest size failed';
+  $('mTable').innerHTML = `<table class="w-full text-sm"><thead><tr class="text-left text-gray-500 border-b"><th class="py-1">requested mb</th><th>status</th><th>peak MB</th><th>server ms</th></tr></thead><tbody>${
+    rows.map(r => `<tr class="border-b border-gray-100 ${!r.ok ? 'bg-red-50' : ''}"><td class="py-1 font-mono">${r.mb}</td><td>${badge(r.ok)}</td><td class="font-mono">${r.peak ?? '—'}</td><td class="font-mono">${r.body.elapsed_ms ?? '—'}</td></tr>`).join('')
+  }</tbody></table>`;
+  $('mRun').disabled = false;
+};
 </script>
+</body>
+</html>

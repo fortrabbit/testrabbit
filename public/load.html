@@ -18,29 +18,15 @@
   <p class="text-sm text-gray-500 mb-3">Drives <code>/load.php</code> (zero-dep, no DB) and <code>/load-sql.php</code> (DB contrast). Knobs: <code>wait</code>=I/O ms, <code>burn</code>=CPU ms, <code>mb</code>=hold N MB.</p>
   <div class="text-sm mb-4 font-mono text-gray-600">host <span id="host">…</span> · memory_limit <span id="mlimit">…</span> · PHP <span id="phpver">…</span></div>
 
-  <details class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm leading-relaxed" open>
-    <summary class="font-bold cursor-pointer">How to use this — testing NEW vs OLD, and what to expect</summary>
-    <div class="mt-3 space-y-3">
-      <p><b>The question:</b> does paying for a bigger PHP plan do anything? A plan gives you two things, both probed here — more <b>PHP processes</b> (concurrency) and more <b>memory</b>. Whether extra processes become extra <i>throughput</i> is the open question; that part needs the k6 arrival test. This page is the fast, visual leading indicator.</p>
-      <p><b>Run it on each platform.</b> The page tests whichever host serves it — deploy to both apps and open each:</p>
+  <details class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm leading-relaxed">
+    <summary class="font-bold cursor-pointer">What is this &amp; what to expect (TL;DR)</summary>
+    <div class="mt-3 space-y-2">
+      <p>Does a bigger PHP plan do anything? It gives more <b>processes</b> and more <b>memory</b> — this page probes both. Rescale the plan between runs and compare.</p>
       <ul class="list-disc ml-5">
-        <li><b>NEW</b> — <span class="font-mono">https://testrabbit.frb.one/load.html</span></li>
-        <li><b>OLD</b> — <span class="font-mono">https://testrabbit-uni.frb.io/load.html</span></li>
+        <li><b>Concurrency</b> — <b>wave-1 ≈ the plan's process count</b> (advertised 2/2/2/4/6/8 for XS→2XL): expect it flat across the smallest tiers, then rising. If it doesn't rise where it should, concurrency is capped.</li>
+        <li><b>Memory ceiling</b> — highest <code>mb</code> before a 500 ≈ <code>memory_limit</code>; grows with the plan only if <code>memory_limit</code> scales.</li>
       </ul>
-      <p><b>Per platform, at each plan tier</b> (rescale in the dashboard between runs, then reload):</p>
-      <ol class="list-decimal ml-5">
-        <li>Note <code>memory_limit</code> (header above, or the <i>info</i> preset).</li>
-        <li><b>Concurrency:</b> N=20, wait=1000 → record the <b>wave-1 count</b> (≈ PHP processes).</li>
-        <li><b>Memory ceiling:</b> run it → record the ceiling.</li>
-        <li>Bump the plan up, reload, repeat. Then compare NEW vs OLD at matched plans.</li>
-      </ol>
-      <p><b>What we expect to find:</b></p>
-      <ul class="list-disc ml-5">
-        <li><b>Concurrency</b> — wave-1 should equal the plan's process count: advertised <span class="font-mono">XS/SM/MD=2, LG=4, XL=6, 2XL=8</span>. So expect it <b>flat across the three smallest tiers</b>, then rising. If it does <i>not</i> rise where it should, concurrency is capped on the platform — a real finding (→ MR-126).</li>
-        <li><b>Memory ceiling</b> ≈ <code>memory_limit</code>. It grows with the plan only if the plan actually raises <code>memory_limit</code> — an open question this settles per tier.</li>
-        <li><b>NEW vs OLD</b> — compare process count + ceiling at matched plans. NEW has historically shown lower capacity and a small per-op tax; watch whether its per-plan processes/memory match OLD's.</li>
-        <li><b>The catch</b> — more processes only become more throughput if requests <i>wait</i> (I/O). That is what the k6 B0 arrival test measures; this page confirms the processes/memory are (or aren't) there to begin with.</li>
-      </ul>
+      <p class="text-gray-500">Whether extra processes buy real <i>throughput</i> (not just concurrency) is the k6 arrival test — this page is the fast visual check.</p>
     </div>
   </details>
 
@@ -56,6 +42,7 @@
   <section class="bg-white rounded-lg p-4 mb-6 shadow-sm">
     <h2 class="text-lg font-bold mb-1">Concurrency — fire N parallel requests</h2>
     <p class="text-sm text-gray-500 mb-3">Each request just <code>wait</code>s (holds no CPU). If the plan runs <b>P</b> PHP processes, ~P finish in the first wave (≈ the wait time); the rest queue into later waves. That wave-1 count ≈ the plan's concurrency. <b>Expect</b> wave-1 ≈ the plan's process count (2/2/2/4/6/8 for XS→2XL); flat across the smallest tiers, then rising.</p>
+    <div id="cPresets" class="flex flex-wrap gap-2 mb-3"></div>
     <div class="flex flex-wrap items-end gap-3 mb-3">
       <label class="text-sm">parallel requests (N)
         <input id="cN" type="number" value="10" min="1" max="200" class="mt-1 block w-24 border rounded px-2 py-1 font-mono">
@@ -130,8 +117,24 @@ hit('/load.php?info=1').then(r => {
 }).catch(() => {});
 
 // ---- Panel 2: concurrency ----
-$('cRun').onclick = async () => {
-  const N = Math.max(1, +$('cN').value), wait = Math.max(1, +$('cWait').value);
+// named presets you can reference by name ("run Probe", "run Saturate")
+const CONC_PRESETS = [
+  ['Probe', 16, 1000],   // canonical: reveals process count + a few waves
+  ['Quick', 8, 500],     // fast sanity
+  ['Heavy', 40, 1000],   // deeper queueing
+  ['Saturate', 100, 1000], // stress
+];
+CONC_PRESETS.forEach(([name, N, wait]) => {
+  const b = document.createElement('button');
+  b.innerHTML = `${name} <span class="text-gray-400 font-mono">${N}×${wait / 1000}s</span>`;
+  b.className = 'border border-gray-300 rounded px-3 py-1.5 text-sm hover:bg-gray-50';
+  b.onclick = () => runConc(N, wait);
+  $('cPresets').appendChild(b);
+});
+$('cRun').onclick = () => runConc(Math.max(1, +$('cN').value), Math.max(1, +$('cWait').value));
+
+async function runConc(N, wait) {
+  $('cN').value = N; $('cWait').value = wait;
   $('cRun').disabled = true; $('cSummary').textContent = `firing ${N}…`;
   $('cTimeline').innerHTML = ''; $('cTable').innerHTML = '';
   const t0 = performance.now();
@@ -156,7 +159,7 @@ $('cRun').onclick = async () => {
     results.map(r => `<tr class="border-b border-gray-100"><td class="py-1 font-mono">#${r.i}</td><td>${badge(r.ok)}</td><td class="font-mono">${r.body.elapsed_ms ?? '—'}</td><td class="font-mono">${Math.round(r.end)} ms</td><td class="font-mono">${waveOf(r.end)}</td></tr>`).join('')
   }</tbody></table>`;
   $('cRun').disabled = false;
-};
+}
 
 // ---- Panel 3: memory ceiling ----
 $('mRun').onclick = async () => {

@@ -108,7 +108,15 @@ class Controller extends BaseController
             rtrim($tempLocation, '/')
         );
 
-        return response()->json($runner->run($count));
+        // Run context so a batch run (performancetest imagickperf.sh) can tell which
+        // platform/host produced the numbers (MR-124).
+        $result = [
+            'host' => gethostname(),
+            'platform' => config('fortrabbit.platform'),
+            'imagick' => Imagick::getVersion()['versionString'] ?? 'unknown',
+        ] + $runner->run($count);
+
+        return response()->json($result);
     }
 
     /**

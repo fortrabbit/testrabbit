@@ -74,6 +74,10 @@
                     <x-link></x-link>
                 </li>
                 <li class="mt-2 flex">
+                    <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/log-volume">Log volume generator</a>
+                    <x-link></x-link>
+                </li>
+                <li class="mt-2 flex">
                     <a class="border-dotted hover:border-solid border-b border-gray-600 mr-2" href="/load.html">PHP plan scaling &mdash; load probe</a>
                     <x-link></x-link>
                 </li>

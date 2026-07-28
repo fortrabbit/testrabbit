@@ -56,7 +56,7 @@
 <script>
 function logVolumeApp() {
     return {
-        form: { target_size: '2gb', bytes_per_second: 2000000, payload_bytes: 768, run_id: '' },
+        form: { target_size: '2gb', bytes_per_second: 2000000, payload_bytes: 49152, run_id: '' },
         run: null, busy: false, error: '', timer: null,
         get active() { return this.run && ['queued', 'running', 'cancelling'].includes(this.run.status); },
         get percent() { return this.run?.target_bytes ? Math.min(100, this.run.written_bytes / this.run.target_bytes * 100) : 0; },

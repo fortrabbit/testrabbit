@@ -30,4 +30,6 @@ existing database queue. A normal worker must be running:
 php artisan queue:work --sleep=5
 ```
 
-Run `php artisan migrate --force` after deploying the feature.
+Run `php artisan migrate --force` after deploying the feature. This also adds
+the standard `jobs` table required by TestRabbit's configured database queue if
+the platform database does not already have it.

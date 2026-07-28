@@ -29,7 +29,7 @@
             </div>
             <div class="flex gap-2 mt-4">
                 <button @click="start" :disabled="active || busy" class="px-4 py-2 rounded bg-gray-800 hover:bg-gray-900 text-white font-semibold disabled:opacity-50">Start worker run</button>
-                <button x-show="active" x-cloak @click="stop" :disabled="busy || run?.status === 'cancelling'" class="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50">Stop</button>
+                <button x-show="active" x-cloak @click="stop" :disabled="busy" class="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50">Stop</button>
             </div>
             <div x-show="error" x-cloak class="mt-3 text-sm text-red-700" x-text="error"></div>
         </div>
@@ -71,8 +71,15 @@ function logVolumeApp() {
             this.busy = true; this.error = '';
             try {
                 const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }, body: JSON.stringify(body) });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || Object.values(data.errors || {}).flat().join(' '));
+                const text = await response.text();
+                let data = {};
+                try { data = text ? JSON.parse(text) : {}; } catch (e) {
+                    throw new Error('Server returned HTTP ' + response.status + ' instead of JSON. Check the application log.');
+                }
+                if (!response.ok) {
+                    if (data.run) this.run = data.run;
+                    throw new Error(data.message || Object.values(data.errors || {}).flat().join(' '));
+                }
                 this.run = data.run;
             } catch (e) { this.error = e.message; } finally { this.busy = false; }
         },

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class LogVolumeController extends Controller
 {
@@ -60,17 +61,31 @@ class LogVolumeController extends Controller
             ]);
         });
 
-        GenerateLogVolume::dispatch($run->id);
+        try {
+            GenerateLogVolume::dispatch($run->id);
+        } catch (Throwable $exception) {
+            $run->forceFill([
+                'status' => 'failed',
+                'error' => 'Unable to queue the worker job: '.$exception->getMessage(),
+                'finished_at' => now(),
+            ])->save();
+
+            return response()->json([
+                'message' => 'Unable to queue the log-volume run.',
+                'run' => $this->serialize($run),
+            ], 500);
+        }
 
         return response()->json(['run' => $this->serialize($run)], 202);
     }
 
     public function stop(LogVolumeRun $run): JsonResponse
     {
-        if ($run->isActive() && ! $run->cancel_requested_at) {
+        if ($run->isActive()) {
             $run->forceFill([
-                'status' => 'cancelling',
-                'cancel_requested_at' => now(),
+                'status' => 'cancelled',
+                'cancel_requested_at' => $run->cancel_requested_at ?? now(),
+                'finished_at' => now(),
             ])->save();
         }
 

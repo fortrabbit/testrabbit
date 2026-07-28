@@ -11,6 +11,13 @@ just start
 just test
 ```
 
+The PHPUnit suite runs in CI against PHP 8.3, 8.4, and 8.5. To run it in a
+built container:
+
+```bash
+docker compose run --rm php83 php artisan test
+```
+
 ## Deployment
 
 This repo is deployed to apps in all regions on the old platform. Further documentation:  

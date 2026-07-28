@@ -21,7 +21,7 @@ class LogVolumeController extends Controller
     public function status(): JsonResponse
     {
         return response()->json([
-            'run' => $this->serialize(LogVolumeRun::latest()->first()),
+            'run' => $this->serialize(LogVolumeRun::latest('id')->first()),
         ]);
     }
 

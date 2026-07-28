@@ -31,12 +31,11 @@ class LogVolumeController extends Controller
             'target_size' => ['required', 'string', 'max:32'],
             'bytes_per_second' => ['required', 'integer', 'min:1', 'max:100000000'],
             'payload_bytes' => ['required', 'integer', 'min:48', 'max:65536'],
-            'progress_size' => ['required', 'string', 'max:32'],
             'run_id' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9._-]+$/'],
         ]);
 
         $targetBytes = $this->parseBytes($values['target_size'], 10_000_000_000);
-        $progressBytes = $this->parseBytes($values['progress_size'], $targetBytes);
+        $progressBytes = min(100_000_000, $targetBytes);
 
         $run = DB::transaction(function () use ($values, $targetBytes, $progressBytes) {
             $active = LogVolumeRun::whereIn('status', ['queued', 'running', 'cancelling'])

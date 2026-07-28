@@ -24,7 +24,6 @@
                 <label><span class="block text-gray-600 mb-1">Target size</span><input x-model="form.target_size" :disabled="active" class="w-full px-2 py-1 border rounded" placeholder="2gb"></label>
                 <label><span class="block text-gray-600 mb-1">Bytes per second</span><input type="number" min="1" max="100000000" x-model.number="form.bytes_per_second" :disabled="active" class="w-full px-2 py-1 border rounded"></label>
                 <label><span class="block text-gray-600 mb-1">Payload bytes</span><input type="number" min="48" max="65536" x-model.number="form.payload_bytes" :disabled="active" class="w-full px-2 py-1 border rounded"></label>
-                <label><span class="block text-gray-600 mb-1">Progress interval</span><input x-model="form.progress_size" :disabled="active" class="w-full px-2 py-1 border rounded" placeholder="100mb"></label>
                 <label class="col-span-2"><span class="block text-gray-600 mb-1">Run ID (optional)</span><input x-model="form.run_id" :disabled="active" class="w-full px-2 py-1 border rounded" placeholder="generated automatically"></label>
             </div>
             <div class="flex gap-2 mt-4">
@@ -50,14 +49,14 @@
         </div>
 
         <div class="bg-white p-4 rounded-lg text-sm text-gray-600">
-            <strong>Worker requirement:</strong> the existing <code>php artisan queue:work --sleep=5</code> process must be running. Large runs are automatically split into short queue jobs so the standard worker timeout remains usable.
+            <strong>Worker requirement:</strong> the existing <code>php artisan queue:work --sleep=5</code> process must be running. Output is capped at 12 lines per second to stay below the platform suppression threshold.
         </div>
     </div>
 </div>
 <script>
 function logVolumeApp() {
     return {
-        form: { target_size: '2gb', bytes_per_second: 2000000, payload_bytes: 768, progress_size: '100mb', run_id: '' },
+        form: { target_size: '2gb', bytes_per_second: 2000000, payload_bytes: 768, run_id: '' },
         run: null, busy: false, error: '', timer: null,
         get active() { return this.run && ['queued', 'running', 'cancelling'].includes(this.run.status); },
         get percent() { return this.run?.target_bytes ? Math.min(100, this.run.written_bytes / this.run.target_bytes * 100) : 0; },

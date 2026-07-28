@@ -44,7 +44,6 @@ class LogVolumeTest extends TestCase
             'target_size' => 'lots',
             'bytes_per_second' => 0,
             'payload_bytes' => 12,
-            'progress_size' => '100mb',
             'run_id' => 'spaces are invalid',
         ])->assertUnprocessable();
 
@@ -97,7 +96,6 @@ class LogVolumeTest extends TestCase
             'target_size' => '2mb',
             'bytes_per_second' => 2_000_000,
             'payload_bytes' => 768,
-            'progress_size' => '1mb',
             'run_id' => 'test-run',
         ];
     }

@@ -19,6 +19,7 @@ class GenerateLogVolume implements ShouldQueue
 
     private const CHUNK_SECONDS = 10;
     private const CANCEL_CHECK_MICROSECONDS = 500_000;
+    private const MAX_LINES_PER_SECOND = 12;
 
     public function __construct(public int $runId)
     {
@@ -46,6 +47,7 @@ class GenerateLogVolume implements ShouldQueue
         $chunkStartedAt = hrtime(true);
         $lastCancelCheckAt = $chunkStartedAt;
         $chunkWritten = 0;
+        $chunkLines = 0;
         $nextProgressAt = (intdiv($run->written_bytes, $run->progress_bytes) + 1) * $run->progress_bytes;
 
         while ($run->written_bytes < $run->target_bytes) {
@@ -76,6 +78,7 @@ class GenerateLogVolume implements ShouldQueue
             $run->written_bytes += $length;
             ++$run->lines;
             $chunkWritten += $length;
+            ++$chunkLines;
 
             if ($run->written_bytes >= $nextProgressAt) {
                 $run->save();
@@ -83,7 +86,10 @@ class GenerateLogVolume implements ShouldQueue
                 $nextProgressAt = (intdiv($run->written_bytes, $run->progress_bytes) + 1) * $run->progress_bytes;
             }
 
-            $expectedSeconds = $chunkWritten / $run->bytes_per_second;
+            $expectedSeconds = max(
+                $chunkWritten / $run->bytes_per_second,
+                $chunkLines / self::MAX_LINES_PER_SECOND,
+            );
             $actualSeconds = (hrtime(true) - $chunkStartedAt) / 1_000_000_000;
             $delay = (int) (($expectedSeconds - $actualSeconds) * 1_000_000);
             if ($delay > 0) {

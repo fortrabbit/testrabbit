@@ -57,8 +57,7 @@ class GenerateLogVolume implements ShouldQueue
             }
 
             if (($now - $lastCancelCheckAt) >= self::CANCEL_CHECK_MICROSECONDS * 1_000) {
-                $run->refresh();
-                if ($run->cancel_requested_at) {
+                if ($this->cancellationRequested($run)) {
                     $this->finish($run, 'cancelled');
                     return;
                 }
@@ -105,6 +104,14 @@ class GenerateLogVolume implements ShouldQueue
         }
 
         self::dispatch($run->id);
+    }
+
+    protected function cancellationRequested(LogVolumeRun $run): bool
+    {
+        return $run->newQuery()
+            ->whereKey($run->getKey())
+            ->whereNotNull('cancel_requested_at')
+            ->exists();
     }
 
     public function failed(?Throwable $exception): void

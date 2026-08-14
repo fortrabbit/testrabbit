@@ -90,6 +90,31 @@ class LogVolumeTest extends TestCase
             ->assertJsonPath('run.status', 'complete');
     }
 
+    public function test_cancellation_check_preserves_unsaved_progress(): void
+    {
+        $run = $this->createRun(['status' => 'running']);
+        $run->written_bytes = 400_000;
+        $run->lines = 6;
+
+        $job = new class($run->id) extends GenerateLogVolume
+        {
+            public function isCancellationRequested(LogVolumeRun $run): bool
+            {
+                return $this->cancellationRequested($run);
+            }
+        };
+
+        $this->assertFalse($job->isCancellationRequested($run));
+        $this->assertSame(400_000, $run->written_bytes);
+        $this->assertSame(6, $run->lines);
+
+        LogVolumeRun::whereKey($run->id)->update(['cancel_requested_at' => now()]);
+
+        $this->assertTrue($job->isCancellationRequested($run));
+        $this->assertSame(400_000, $run->written_bytes);
+        $this->assertSame(6, $run->lines);
+    }
+
     private function validPayload(): array
     {
         return [

@@ -35,6 +35,11 @@ jobs:
             --tag $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} \
             .
 
+      - name: Run application tests
+        env:
+          PHP_VERSION: ${{ matrix.php-version }}
+        run: docker run --rm $DOCKER_REGISTRY_IMAGE:${PHP_VERSION} php artisan test
+
 #      - name: Cache vendor folder
 #        uses: actions/cache@v3
 #        with:

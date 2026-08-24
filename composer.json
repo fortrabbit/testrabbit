@@ -18,7 +18,9 @@
     },
     "require-dev": {
         "laravel/sail": "^1.41",
-        "nunomaduro/collision": "^8.6"
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^12.0"
     },
     "autoload": {
         "psr-4": {

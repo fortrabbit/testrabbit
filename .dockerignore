@@ -11,3 +11,4 @@
 /Justfile
 /storage/
 /vendor/
+/bootstrap/cache/*.php
